@@ -11,7 +11,7 @@
 <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 <!-- Phosphor Icons -->
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
-<!-- Google Fonts (Inter) -->
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script>
@@ -19,7 +19,6 @@
 // ENVIRONMENT CONFIGURATION
 // ==========================================
 const ACTIVE_ENV = 'DEV';
-
 const ENV_URLS = {
   PROD: "https://script.google.com/macros/s/AKfycbxvb1ps89oUF1i75Ba-9yCQFFoojLCmly_55HT2P6W7WkKJa3I6vLRWiDRS0kqcj5uYDw/exec",
   DEV: "https://script.google.com/macros/s/AKfycbz5lEH75nTIX2epTYjirnSesn0Lt7HAUrczaEYTL031haBWzNaQSw9FmOowU_5jD1TY/exec"
@@ -31,618 +30,420 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   :root { 
     --bg-color: #f3f4f6; 
     --text-color: #111827; 
-    --glass-bg: rgba(255, 255, 255, 0.85); 
-    --glass-border: rgba(0, 0, 0, 0.08); 
+    --glass-bg: rgba(255, 255, 255, 0.8); 
+    --glass-border: rgba(0, 0, 0, 0.1); 
     --glass-strong-bg: #ffffff; 
     --input-bg: #ffffff; 
     --input-border: #d1d5db; 
-    --primary: #3b82f6; 
   }
   .dark { 
     --bg-color: #0f172a; 
     --text-color: #e2e8f0; 
-    --glass-bg: rgba(30, 41, 59, 0.75); 
+    --glass-bg: rgba(30, 41, 59, 0.7); 
     --glass-border: rgba(255, 255, 255, 0.1); 
     --glass-strong-bg: rgba(15, 23, 42, 0.95); 
     --input-bg: #1e293b; 
     --input-border: #334155; 
   }
 
-  /* Custom Scrollbar */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background-color: var(--input-border); border-radius: 10px; }
-
-  body { 
-    font-family: 'Inter', sans-serif; 
-    background-color: var(--bg-color); 
-    color: var(--text-color); 
-    -webkit-tap-highlight-color: transparent; 
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
+  body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); -webkit-tap-highlight-color: transparent; transition: background-color 0.3s, color 0.3s; }
+  
   .glass { background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); }
   .glass-strong { background: var(--glass-strong-bg); }
   
   .fade-in { animation: fadeIn 0.3s ease-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .input-field { 
-    background: var(--input-bg); 
-    color: var(--text-color); 
-    border: 1px solid var(--input-border); 
-    border-radius: 0.5rem; 
-    outline: none; 
-    padding: 0.75rem; 
-  }
-  .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
+  .input-field { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); font-size: 0.95rem; border-radius: 0.5rem; outline: none; transition: all 0.2s; padding: 0.75rem; width: 100%; }
+  .input-field:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
 
-  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; transition: transform 0.1s, opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); transition: transform 0.1s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; cursor: pointer; }
   .btn-primary:active { transform: scale(0.98); }
-  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
-  .btn-secondary { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
-  
-  .app-view { display: none; flex-direction: column; gap: 0.75rem; height: 100%; flex-grow: 1; overflow: hidden; animation: fadeIn 0.3s ease-in-out; }
-  .dialog-container { flex-grow: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 0 0.75rem 0.75rem 0.75rem; display: flex; flex-direction: column; overflow: hidden; }
+  /* Section Styling */
+  .section-basic { border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.05); }
+  .section-medical { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); }
+  .section-abilities { border-left: 4px solid #a855f7; background: rgba(168, 85, 247, 0.05); }
+  .section-engagement { border-left: 4px solid #eab308; background: rgba(234, 179, 8, 0.05); }
 
-  /* Lists */
-  .checkbox-list-wrapper { overflow-y: auto; flex-grow: 1; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); }
-  .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; font-size: 0.9rem; }
-  .checkbox-list-wrapper input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--primary); }
+  details > summary { list-style: none; cursor: pointer; outline: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary .chevron { transition: transform 0.3s; }
+  details[open] > summary .chevron { transform: rotate(180deg); }
+  details[open] > div { animation: slideDown 0.3s ease-out; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Card Layouts */
-  .trainee-row { background: var(--glass-strong-bg); border: 1px solid var(--glass-border); transition: transform 0.1s; }
-  .trainee-row:active { transform: scale(0.98); }
-
-  /* Info Card Text Parse */
-  .parsed-section { background: var(--glass-strong-bg); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 0.75rem; margin-bottom: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-  .parsed-section h4 { color: var(--primary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-  .parsed-section p, .parsed-section ul { font-size: 0.95rem; white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; }
-  .parsed-section ul { list-style-type: disc; padding-left: 1.25rem; }
-
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+  .checkbox-list-wrapper { max-height: 200px; overflow-y: auto; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); }
+  .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.4rem; padding: 0.65rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; font-size: 0.8rem; color: var(--text-color); }
+  .checkbox-list-wrapper input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: #3b82f6; cursor: pointer; }
 </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
 
-<div id="dev-banner" class="w-full bg-red-600 text-white text-center text-xs font-bold py-1 hidden z-[1000] tracking-widest uppercase">DEV MODE</div>
-
+<!-- Dev Mode & Toasts -->
+<div id="dev-banner" class="w-full bg-red-600 text-white text-center text-xs font-bold py-1 hidden tracking-widest uppercase">DEV MODE</div>
 <div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl hidden flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300">
   <span id="toast-msg">Notification</span>
 </div>
 
-<!-- Header -->
-<header class="glass sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm mb-4">
-  <div class="flex items-center gap-3">
-    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
-      <i class="ph-bold ph-identification-card text-white text-xl"></i>
+<!-- MAIN LOGIN VIEW -->
+<div id="landing-page" class="flex-grow flex flex-col justify-center items-center p-4 fade-in relative">
+  <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center relative">
+    <div class="absolute top-4 right-4 flex gap-1">
+      <button onclick="toggleTheme()" class="p-1.5 rounded-full bg-gray-500/10 hover:bg-gray-500/20 transition text-sm">🌗</button>
     </div>
-    <div class="flex flex-col">
-      <span class="font-bold text-[1.1rem] leading-tight">Trainee Info</span>
-      <span class="text-[0.65rem] opacity-60 uppercase tracking-widest leading-none">Cards Portal</span>
-    </div>
-  </div>
-  <div class="flex items-center gap-1">
-    <button onclick="promptForPassword()" class="p-2 text-2xl opacity-70 hover:opacity-100 transition-opacity" title="Admin Settings">
-      <i class="ph-bold ph-gear"></i>
-    </button>
-    <button onclick="toggleTheme()" class="p-2 text-2xl opacity-70 hover:opacity-100 transition-opacity">🌗</button>
-  </div>
-</header>
-
-<div class="dialog-container">
-
-  <!-- Landing / Login View -->
-  <div id="landing-page" class="app-view items-center justify-center pb-20">
-    <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm shadow-xl text-center">
-      <div class="mb-4 flex justify-center">
-        <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg mx-auto">
-           <i class="ph-bold ph-lock-key text-white text-3xl"></i>
-        </div>
-      </div>
-      <h2 class="text-2xl font-bold mb-2">Access Portal</h2>
-      <p class="opacity-70 mb-6 text-sm">Enter your access code to continue.</p>
-      
-      <form onsubmit="event.preventDefault(); handleGeneralLogin();">
-        <div class="mb-4 relative">
-          <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1"></p>
-          <div class="relative text-left">
-            <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 py-3 w-full" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
-            <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-blue-500"><i class="ph-bold ph-eye-slash text-xl"></i></button>
-          </div>
-        </div>
-        <button type="submit" id="general-login-btn" class="btn-primary py-3 w-full text-lg">
-          <i class="ph-bold ph-sign-in text-xl"></i> Login
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Main Trainee List View -->
-  <div id="trainee-list-view" class="app-view">
-    <div class="glass flex flex-col h-full rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-      <div class="p-4 border-b" style="border-color: var(--glass-border);">
-        <h2 class="font-bold text-lg mb-3">Select Trainee</h2>
-        <div class="relative w-full">
-          <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-          <input type="text" id="traineeSearch" class="input-field w-full pl-10" placeholder="Search by name..." onkeyup="filterTraineeList()">
-        </div>
-      </div>
-      
-      <div id="traineeListContainer" class="flex-grow overflow-y-auto p-2 space-y-2 pb-6 bg-gray-50/50 dark:bg-gray-900/50">
-        <!-- JS Populated -->
+    <div class="mb-4 flex justify-center">
+      <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg mx-auto">
+         <i class="ph-bold ph-identification-card text-white text-3xl"></i>
       </div>
     </div>
-    <button type="button" class="btn-secondary mt-2 flex-shrink-0" onclick="goToLandingPage()">
-      <i class="ph-bold ph-sign-out text-xl"></i> Logout
-    </button>
-  </div>
-
-  <!-- Trainee Details View (Inline Card) -->
-  <div id="trainee-details-view" class="app-view">
-    <div class="flex justify-between items-center mb-2 flex-shrink-0">
-      <button onclick="backToListView()" class="btn-secondary w-auto px-4 py-2 text-sm"><i class="ph-bold ph-arrow-left text-lg"></i> Back</button>
-      <span class="font-bold opacity-70 text-sm">Trainee Profile</span>
-    </div>
-
-    <div id="cardLoadingIndicator" class="hidden flex-col items-center justify-center flex-grow">
-      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
-      <span class="opacity-70 font-medium">Loading Profile...</span>
-    </div>
-
-    <div id="cardContentContainer" class="flex-grow overflow-y-auto pb-6 hidden flex-col gap-2">
-      <!-- Profile Header -->
-      <div class="glass-strong rounded-2xl p-6 text-center shadow-sm border border-gray-100 dark:border-gray-700 relative">
-        <div class="w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg mb-4 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-          <img id="detailPhoto" src="" class="w-full h-full object-cover hidden" alt="Photo">
-          <i id="detailPhotoFallback" class="ph-bold ph-user text-4xl text-gray-400"></i>
-        </div>
-        <h1 id="detailFullName" class="text-2xl font-bold leading-tight mb-1">Full Name</h1>
-        <p id="detailShortName" class="text-blue-500 font-semibold text-sm tracking-wide uppercase">Short Name</p>
-      </div>
-
-      <!-- Generated Text Sections -->
-      <div id="detailGeneratedText" class="flex flex-col gap-1 mt-2">
-         <!-- Parsed HTML injected here -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings View -->
-  <div id="settings-page" class="app-view">
-    <div class="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
-        
-        <!-- Generate Info Text Panel -->
-        <div class="glass flex flex-col flex-1 rounded-2xl shadow-sm p-4 overflow-hidden">
-            <div class="flex items-center gap-2 border-b pb-3 mb-3" style="border-color: var(--glass-border);">
-                <i class="ph-bold ph-robot text-xl text-blue-500"></i>
-                <h2 class="font-bold text-lg">Generate AI Profiles</h2>
-            </div>
-            <p class="text-xs opacity-70 mb-3">Check trainees to summarize and save their info to the database.</p>
-            
-            <div class="flex items-center justify-between mb-2">
-                <label class="flex items-center gap-2 text-sm font-bold cursor-pointer">
-                    <input type="checkbox" id="checkAllSettingsTrainees" class="w-4 h-4 accent-blue-500" onchange="toggleAllSettingsTrainees(this)"> Select All
-                </label>
-            </div>
-            
-            <div class="checkbox-list-wrapper shadow-inner mb-4">
-                <div id="settingsTraineeList" class="flex flex-col"></div>
-            </div>
-
-            <div id="generationProgressContainer" class="hidden mb-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                <div class="flex justify-between text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">
-                    <span id="genProgressText">Processing 0 / 0</span>
-                    <span id="genProgressPct">0%</span>
-                </div>
-                <div class="w-full bg-blue-200 dark:bg-blue-950 rounded-full h-1.5">
-                    <div id="genProgressBar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-                <p id="genCurrentName" class="text-xs opacity-70 mt-1 truncate">...</p>
-            </div>
-
-            <button type="button" id="btnGenerateAdmin" class="btn-primary" onclick="handleAdminGeneration()">
-                <i class="ph-bold ph-magic-wand text-xl"></i> Generate Selected
-            </button>
-        </div>
-
-        <!-- Password Settings -->
-        <div class="glass flex flex-col flex-1 rounded-2xl shadow-sm p-4 overflow-y-auto">
-            <div class="flex items-center gap-2 border-b pb-3 mb-4" style="border-color: var(--glass-border);">
-                <i class="ph-bold ph-lock-key text-xl"></i>
-                <h2 class="font-bold text-lg">Access Codes</h2>
-            </div>
-            <div class="space-y-4">
-                <div>
-                  <label class="block text-xs font-bold opacity-70 mb-1">Regular Volunteer</label>
-                  <input type="password" id="new-reg-pass" class="input-field w-full">
-                </div>
-                <div>
-                  <label class="block text-xs font-bold opacity-70 mb-1">Adhoc Volunteer</label>
-                  <input type="password" id="new-adhoc-pass" class="input-field w-full">
-                </div>
-                <div class="border-t pt-4" style="border-color: var(--glass-border);">
-                  <label class="block text-xs font-bold opacity-70 mb-1">Admin Settings</label>
-                  <input type="password" id="new-settings-pass" class="input-field w-full mb-2" placeholder="New Admin Pass">
-                  <input type="password" id="confirm-settings-pass" class="input-field w-full" placeholder="Confirm Admin Pass">
-                </div>
-                <p id="password-change-error" class="text-red-500 text-sm font-bold text-center"></p>
-                <button type="button" class="btn-secondary w-full py-2" onclick="handleUpdatePasswords()">
-                  <i class="ph-bold ph-floppy-disk"></i> Save Codes
-                </button>
-            </div>
-        </div>
-    </div>
+    <h2 class="text-2xl font-bold mb-1 leading-tight">Access Portal</h2>
+    <p class="opacity-70 mb-6 text-sm">Enter your access code to continue.</p>
     
-    <div class="mt-2 flex-shrink-0">
-        <button type="button" class="btn-secondary w-full" onclick="goToLandingPage()">
-          <i class="ph-bold ph-sign-out text-xl"></i> Logout Admin
-        </button>
-    </div>
+    <form onsubmit="event.preventDefault(); handleGeneralLogin();">
+      <div class="mb-4 relative">
+        <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
+        <div class="relative text-left">
+          <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
+          <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-blue-500"><i class="ph-bold ph-eye-slash text-xl"></i></button>
+        </div>
+      </div>
+      <button type="submit" id="general-login-btn" class="btn-primary py-3 mb-4"><i class="ph-bold ph-sign-in text-xl"></i> Login</button>
+    </form>
+    <button onclick="openAdminSettingsAuth()" class="opacity-60 hover:opacity-100 transition flex items-center justify-center gap-1 mx-auto py-2 text-sm"><i class="ph-fill ph-gear"></i> Admin Settings</button>
   </div>
 </div>
 
-<!-- Password Modal (Admin Settings) -->
-<div id="password-modal" class="modal-overlay">
-  <div class="absolute inset-0" onclick="closePasswordModal()"></div>
-  <div class="glass-strong p-6 rounded-2xl w-full max-w-sm shadow-2xl relative z-10 mx-4">
-   <div class="flex justify-between items-center mb-4">
-     <h3 class="text-lg font-bold">Admin Access</h3>
-     <button onclick="closePasswordModal()" class="opacity-60 hover:opacity-100"><i class="ph-bold ph-x text-xl"></i></button>
-   </div>
-   <form onsubmit="event.preventDefault(); handleAdminAuthSubmit();">
-     <div class="mb-5 relative">
-       <p id="password-modal-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
-       <div class="relative">
-         <input id="password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 w-full" placeholder="••••••••" autofocus oninput="document.getElementById('password-modal-error').classList.add('hidden')">
-         <button type="button" onclick="togglePasswordIcon(this, 'password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-blue-500"><i class="ph-bold ph-eye-slash text-xl"></i></button>
-       </div>
-     </div>
-     <div class="flex gap-2">
-         <button type="button" class="btn-secondary flex-1" onclick="closePasswordModal()">Cancel</button>
-         <button type="submit" id="admin-auth-btn" class="btn-primary flex-1">Unlock</button>
-     </div>
-   </form>
+<!-- IN-APP TRAINEE VIEWER -->
+<div id="main-app-content" class="hidden min-h-screen flex flex-col">
+  <header class="glass sticky top-0 z-40 px-3 py-2 flex flex-col shadow-sm gap-2">
+    <div class="flex justify-between items-center w-full">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md"><i class="ph-bold ph-users text-white text-lg"></i></div>
+        <div class="flex flex-col"><span class="font-bold text-sm leading-none">Trainee Info</span><span class="text-[10px] opacity-60 uppercase tracking-widest mt-0.5">Mobile Portal</span></div>
+      </div>
+      <div class="flex items-center gap-2">
+         <button onclick="toggleTheme()" class="p-1.5 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-sm border border-white/10 transition">🌗</button>
+         <button onclick="logout()" class="p-1.5 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition"><i class="ph-bold ph-sign-out text-xl"></i></button>
+      </div>
+    </div>
+    <div id="user-badge" class="self-start text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-gray-500/20 text-gray-500 border border-gray-500/30">Guest</div>
+  </header>
+  
+  <main class="flex-grow p-3 pb-24 max-w-2xl mx-auto w-full space-y-4">
+    <div class="space-y-3 sticky top-16 z-30 pt-1 pb-2" style="background: var(--bg-color);">
+      <select id="trainee-select" class="input-field text-lg font-bold shadow-sm" onchange="fetchTraineeInfo()">
+          <option value="" disabled selected>Select Trainee to View...</option>
+      </select>
+    </div>
+    
+    <div id="loader-view" class="hidden text-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+      <p class="opacity-70 text-sm animate-pulse">Fetching Profile...</p>
+    </div>
+    
+    <div id="card-container" class="space-y-3 pb-10"></div>
+  </main>
+</div>
+
+<!-- ADMIN SETTINGS MODAL -->
+<div id="modal-settings" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+  <div class="absolute inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" onclick="toggleSettingsModal(false)"></div>
+  <div class="glass-strong w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl p-5 md:rounded-2xl shadow-2xl relative overflow-y-auto flex flex-col">
+    <div class="flex justify-between items-center mb-4 shrink-0">
+      <h2 class="text-xl font-bold flex items-center gap-2"><i class="ph-bold ph-gear text-blue-500"></i> Admin Access</h2>
+      <button onclick="toggleSettingsModal(false)"><i class="ph-bold ph-x text-xl opacity-60 hover:opacity-100"></i></button>
+    </div>
+    
+    <!-- Auth Step -->
+    <div id="settings-step-auth" class="flex-grow flex flex-col justify-center">
+      <p class="opacity-70 mb-4 text-sm">Enter admin password to unlock configurations.</p>
+      <form onsubmit="event.preventDefault(); handleAdminAuth();">
+        <div class="relative mb-4 text-left">
+          <p id="admin-error-msg" class="text-red-500 text-xs font-bold mb-1 hidden pl-1">Invalid Password</p>
+          <div class="relative"><input type="password" id="admin-pass" class="input-field pr-10" placeholder="••••••••" oninput="document.getElementById('admin-error-msg').classList.add('hidden')"><button type="button" onclick="togglePasswordIcon(this, 'admin-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-xl"></i></button></div>
+        </div>
+        <button type="submit" id="btn-admin-login" class="btn-primary w-full">Unlock Settings</button>
+      </form>
+    </div>
+
+    <!-- Edit Step -->
+    <div id="settings-step-edit" class="hidden space-y-6 pb-20">
+      <!-- Generation Tool -->
+      <div class="p-4 rounded-xl" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);">
+          <h3 class="font-bold mb-1 flex items-center gap-2"><i class="ph-bold ph-magic-wand text-blue-500"></i> AI Card Generator</h3>
+          <p class="text-xs opacity-70 mb-3">Pre-generate info cards directly to the sheet.</p>
+          <div class="flex gap-2 mb-2">
+              <select id="admin-regen-select" class="input-field py-2 text-sm flex-grow"></select>
+              <button onclick="runAdminGeneration()" id="btn-admin-gen" class="bg-blue-600 text-white font-bold text-sm px-4 rounded-lg shadow-md hover:bg-blue-700">Run</button>
+          </div>
+          <p id="admin-regen-status" class="text-xs font-bold text-blue-500 hidden text-center mt-1">Processing...</p>
+      </div>
+
+      <!-- Field Mapping -->
+      <div>
+         <h3 class="font-bold mb-2 border-b pb-1" style="border-color: var(--glass-border);">Role Data Access Mapping</h3>
+         <div class="space-y-3">
+             <div>
+               <label class="block text-xs font-bold opacity-70 mb-1">Regular Volunteer Fields</label>
+               <div class="checkbox-list-wrapper"><div id="settings-regular-fields" class="flex flex-col"></div></div>
+             </div>
+             <div>
+               <label class="block text-xs font-bold opacity-70 mb-1">Adhoc Volunteer Fields</label>
+               <div class="checkbox-list-wrapper"><div id="settings-adhoc-fields" class="flex flex-col"></div></div>
+             </div>
+         </div>
+         <button onclick="handleSaveFieldSettings()" class="bg-green-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90">Save Field Mappings</button>
+      </div>
+
+      <!-- Passwords -->
+      <div>
+         <h3 class="font-bold mb-2 border-b pb-1" style="border-color: var(--glass-border);">Change Access Passwords</h3>
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+             <div><label class="block text-[10px] font-bold opacity-60 mb-1">REGULAR VOL.</label><input type="text" id="set-regPass" class="input-field py-1.5 px-2 text-sm"></div>
+             <div><label class="block text-[10px] font-bold opacity-60 mb-1">ADHOC VOL.</label><input type="text" id="set-adhocPass" class="input-field py-1.5 px-2 text-sm"></div>
+             <div><label class="block text-[10px] font-bold opacity-60 mb-1">ADMIN SETTINGS</label><input type="text" id="set-adminPass" class="input-field py-1.5 px-2 text-sm"></div>
+         </div>
+         <button onclick="handleSavePasswords()" class="bg-yellow-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90">Update Passwords Only</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
 // ==========================================
-// BACKGROUND INIT & DATA STATE
+// BACKGROUND DATA LOAD
 // ==========================================
-let appData = { allTrainees:[] };
-let initPromise = null;
-let initError = null;
+let appData = null;
+let currentProfile = '';
+let dataPromise = callBackend('getInitialData').then(d => { appData = d; return d; }).catch(e => console.error(e));
 
-// Fire API request instantly in the background
-function startBackgroundInit() {
-  initPromise = callBackend('getInitialData')
-    .then(data => { appData = data; })
-    .catch(err => { initError = err; });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (ACTIVE_ENV === 'DEV') document.getElementById('dev-banner').style.display = 'block';
-  if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
-  
-  startBackgroundInit();
-  switchView('landing-page');
-});
+if (ACTIVE_ENV === 'DEV') document.getElementById('dev-banner').style.display = 'block';
+if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
 
 async function callBackend(action, payload = {}) {
-  try {
-    const response = await fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, payload })
-    });
-    const rawText = await response.text();
-    let result;
-    try { result = JSON.parse(rawText); } 
-    catch (e) { throw new Error("Invalid response from server. Check permissions."); }
-    if (!result.success) throw new Error(result.error);
-    return result.data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-async function waitForDataReady() {
-  if (initError) throw initError;
-  if (!initPromise) return;
-  await initPromise;
-  if (initError) throw initError;
+  const response = await fetch(GAS_WEB_APP_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, payload })
+  });
+  const text = await response.text();
+  let result;
+  try { result = JSON.parse(text); } catch(e) { throw new Error("Connection failed. Check permissions."); }
+  if (!result.success) throw new Error(result.error);
+  return result.data;
 }
 
 // ==========================================
-// UTILITIES & THEME
+// UI LOGIC & FLOW
 // ==========================================
-function switchView(viewId) {
-  document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
-  document.getElementById(viewId).style.display = 'flex';
-}
-
-function toggleTheme() {
+function toggleTheme(save = true) {
   const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  if (save) localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
 
-function togglePasswordIcon(btn, inputId) {
-  const input = document.getElementById(inputId);
-  const icon = btn.querySelector('i');
+function togglePasswordIcon(btn, id) {
+  const input = document.getElementById(id), i = btn.querySelector('i');
   const isPass = input.type === 'password';
   input.type = isPass ? 'text' : 'password';
-  icon.classList.replace(isPass ? 'ph-eye-slash' : 'ph-eye', isPass ? 'ph-eye' : 'ph-eye-slash');
+  i.className = isPass ? 'ph-bold ph-eye text-xl' : 'ph-bold ph-eye-slash text-xl';
 }
 
 function showToast(msg, isError = false) {
   const el = document.getElementById('toast');
-  document.getElementById('toast-msg').innerText = msg;
-  el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isError ? "text-red-500 border-red-500 bg-red-50" : "text-blue-500 border-blue-500 bg-blue-50"}`;
-  if(window.toastTimer) clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => el.classList.add('hidden'), 3500);
+  el.innerText = msg;
+  el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300`;
+  if(isError) el.classList.add("text-red-500", "border-red-500", "bg-red-500/10");
+  else el.classList.add("text-blue-500", "border-blue-500", "bg-blue-500/10");
+  
+  if(window.tTimer) clearTimeout(window.tTimer);
+  window.tTimer = setTimeout(() => el.classList.add('hidden'), 3500);
 }
 
-function escapeHtml(unsafe) {
-  if (!unsafe) return '';
-  return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
-// ==========================================
-// LOGIN & ROUTING
-// ==========================================
 async function handleGeneralLogin() {
-  const password = document.getElementById('general-password-input').value;
-  const errorEl = document.getElementById('general-login-error');
-  if (!password) { errorEl.textContent = 'Enter password.'; errorEl.classList.remove('hidden'); return; }
-
+  const pass = document.getElementById('general-password-input').value;
+  const err = document.getElementById('general-login-error');
   const btn = document.getElementById('general-login-btn');
-  const originalHtml = btn.innerHTML;
-  btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Verifying...';
-  btn.disabled = true;
+  if(!pass) return err.classList.remove('hidden');
+
+  btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Verifying...'; btn.disabled = true;
 
   try {
-    const profile = await callBackend('login', { password });
-    if (!profile) {
-      errorEl.textContent = 'Incorrect password.';
-      errorEl.classList.remove('hidden');
-      btn.innerHTML = originalHtml;
-      btn.disabled = false;
-      return;
-    }
-
-    btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Loading Data...';
-    await waitForDataReady();
-
-    if (profile === 'Settings') {
-      loadSettingsPage();
+    if (!appData) await dataPromise; // Ensure bg-load completed
+    const profile = await callBackend('login', { password: pass });
+    btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Login'; btn.disabled = false;
+    
+    if (profile === 'Settings') return openAdminSettingsAuth(true);
+    if (profile) {
+       currentProfile = profile;
+       document.getElementById('user-badge').innerText = profile;
+       document.getElementById('user-badge').className = profile === 'Regular Volunteer' 
+          ? 'self-start text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-green-500/20 text-green-500 border border-green-500/30'
+          : 'self-start text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-yellow-500/20 text-yellow-500 border border-yellow-500/30';
+       
+       populateTraineeSelect('trainee-select');
+       document.getElementById('landing-page').style.display = 'none';
+       document.getElementById('main-app-content').style.display = 'flex';
     } else {
-      loadTraineeListView();
+       err.innerText = "Incorrect Password"; err.classList.remove('hidden');
     }
-  } catch (err) {
-    errorEl.textContent = err.message || "Connection failed.";
-    errorEl.classList.remove('hidden');
-    btn.innerHTML = originalHtml;
-    btn.disabled = false;
+  } catch(e) {
+    btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Login'; btn.disabled = false;
+    err.innerText = "Error: " + e.message; err.classList.remove('hidden');
   }
+}
+
+function logout() {
+  currentProfile = '';
+  document.getElementById('general-password-input').value = '';
+  document.getElementById('card-container').innerHTML = '';
+  document.getElementById('trainee-select').value = '';
+  document.getElementById('main-app-content').style.display = 'none';
+  document.getElementById('landing-page').style.display = 'flex';
+}
+
+function populateTraineeSelect(id, includeAll = false) {
+  if (!appData) return;
+  const select = document.getElementById(id);
+  select.innerHTML = (includeAll ? '<option value="ALL">All Trainees (Batch)</option>' : '<option value="" disabled selected>Select Trainee...</option>') 
+                   + appData.allTrainees.map(t => `<option value="${t}">${t}</option>`).join('');
 }
 
 // ==========================================
-// VOLUNTEER UI (Trainee List & Cards)
+// VIEWER ENGINE
 // ==========================================
-function loadTraineeListView() {
-  const container = document.getElementById('traineeListContainer');
-  if (!appData.allTrainees || appData.allTrainees.length === 0) {
-    container.innerHTML = '<div class="p-6 text-center opacity-60 font-medium">No active trainees found.</div>';
-  } else {
-    container.innerHTML = appData.allTrainees.map(t => `
-      <button class="trainee-row w-full text-left p-4 rounded-xl flex items-center justify-between" onclick="openTraineeCard('${escapeHtml(t)}')">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold shadow-sm">
-            ${escapeHtml(t.charAt(0).toUpperCase())}
-          </div>
-          <span class="font-semibold text-base">${escapeHtml(t)}</span>
-        </div>
-        <i class="ph-bold ph-caret-right opacity-40"></i>
-      </button>
-    `).join('');
-  }
-  switchView('trainee-list-view');
-}
+function formatText(t) { return String(t).replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); }
 
-function filterTraineeList() {
-  const filter = document.getElementById('traineeSearch').value.toUpperCase();
-  const rows = document.getElementById('traineeListContainer').getElementsByTagName('button');
-  for (let i = 0; i < rows.length; i++) {
-    const name = rows[i].querySelector('span').innerText;
-    rows[i].style.display = name.toUpperCase().indexOf(filter) > -1 ? "flex" : "none";
-  }
-}
-
-function backToListView() {
-  switchView('trainee-list-view');
-}
-
-async function openTraineeCard(shortName) {
-  switchView('trainee-details-view');
-  document.getElementById('cardContentContainer').classList.add('hidden');
-  document.getElementById('cardLoadingIndicator').classList.replace('hidden', 'flex');
-
-  try {
-    const data = await callBackend('getTraineeCard', { traineeName: shortName });
-    
-    // Header
-    document.getElementById('detailFullName').textContent = data.fullName;
-    document.getElementById('detailShortName').textContent = data.shortName;
-    
-    const photoImg = document.getElementById('detailPhoto');
-    const fallback = document.getElementById('detailPhotoFallback');
-    if (data.photoBase64) {
-      photoImg.src = data.photoBase64;
-      photoImg.classList.remove('hidden');
-      fallback.classList.add('hidden');
-    } else {
-      photoImg.classList.add('hidden');
-      fallback.classList.remove('hidden');
-    }
-
-    // Text Content
-    const contentDiv = document.getElementById('detailGeneratedText');
-    if (!data.infoText) {
-      contentDiv.innerHTML = '<div class="text-center p-8 opacity-60 italic border border-dashed rounded-xl border-gray-300 dark:border-gray-700 mt-4">Card content has not been generated by the admin yet.</div>';
-    } else {
-      contentDiv.innerHTML = renderParsedMarkdown(data.infoText);
-    }
-
-    document.getElementById('cardLoadingIndicator').classList.replace('flex', 'hidden');
-    document.getElementById('cardContentContainer').classList.replace('hidden', 'flex');
-
-  } catch (err) {
-    document.getElementById('cardLoadingIndicator').classList.replace('flex', 'hidden');
-    showToast("Error loading profile: " + err.message, true);
-    setTimeout(backToListView, 1500);
-  }
-}
-
-function renderParsedMarkdown(text) {
-  const parts = text.split('### ');
-  let html = '';
-  parts.forEach(part => {
-    if (!part.trim()) return;
-    const lines = part.trim().split('\n');
-    const title = lines.shift();
-    let content = escapeHtml(lines.join('\n').trim());
-    
-    // Convert basic markdown bullets to HTML bullets
-    content = content.replace(/^- (.*)$/gm, '<li>$1</li>');
-    if (content.includes('<li>')) content = `<ul class="space-y-1 my-1">${content}</ul>`;
-    
-    html += `
-      <div class="parsed-section">
-        <h4>${escapeHtml(title)}</h4>
-        <div class="text-gray-800 dark:text-gray-200">${content}</div>
-      </div>
-    `;
-  });
-  return html;
-}
-
-// ==========================================
-// ADMIN SETTINGS UI
-// ==========================================
-function promptForPassword() {
-  document.getElementById('password-modal-error').classList.add('hidden');
-  const input = document.getElementById('password-input');
-  input.value = ''; input.type = 'password';
-  document.getElementById('password-modal').style.display = 'flex';
-  setTimeout(() => input.focus(), 100);
-}
-
-function closePasswordModal() {
-  document.getElementById('password-modal').style.display = 'none';
-}
-
-async function handleAdminAuthSubmit() {
-  const password = document.getElementById('password-input').value;
-  const errorEl = document.getElementById('password-modal-error');
-  const btn = document.getElementById('admin-auth-btn');
+async function fetchTraineeInfo() {
+  const name = document.getElementById('trainee-select').value;
+  if (!name) return;
   
-  if (!password) { errorEl.textContent = 'Enter password.'; errorEl.classList.remove('hidden'); return; }
-  
-  btn.innerText = 'Verifying...'; btn.disabled = true;
-  try {
-    const isValid = await callBackend('verifySettingsPassword', { password });
-    if (isValid) {
-      closePasswordModal();
-      btn.innerText = 'Unlock'; btn.disabled = false;
-      await waitForDataReady();
-      loadSettingsPage();
-    } else {
-      errorEl.textContent = 'Incorrect admin password.'; errorEl.classList.remove('hidden');
-      btn.innerText = 'Unlock'; btn.disabled = false;
-    }
-  } catch (err) {
-    errorEl.textContent = 'Error: ' + err.message; errorEl.classList.remove('hidden');
-    btn.innerText = 'Unlock'; btn.disabled = false;
-  }
-}
-
-function loadSettingsPage() {
-  const container = document.getElementById('settingsTraineeList');
-  container.innerHTML = appData.allTrainees.map(t => {
-    const id = `set-tr-${t.replace(/\W/g, '_')}`;
-    return `<label for="${id}"><input type="checkbox" value="${t}" id="${id}"><span>${t}</span></label>`;
-  }).join('');
-  document.getElementById('checkAllSettingsTrainees').checked = false;['new-reg-pass', 'new-adhoc-pass', 'new-settings-pass', 'confirm-settings-pass'].forEach(id => {
-     document.getElementById(id).value = '';
-  });
-  document.getElementById('password-change-error').textContent = '';
-  switchView('settings-page');
-}
-
-function toggleAllSettingsTrainees(checkbox) {
-  document.querySelectorAll('#settingsTraineeList input[type="checkbox"]').forEach(cb => cb.checked = checkbox.checked);
-}
-
-// Admin Password Update
-async function handleUpdatePasswords() {
-  const newReg = document.getElementById('new-reg-pass').value;
-  const newAdhoc = document.getElementById('new-adhoc-pass').value;
-  const newSet = document.getElementById('new-settings-pass').value;
-  const confSet = document.getElementById('confirm-settings-pass').value;
-  const err = document.getElementById('password-change-error');
-  
-  err.textContent = '';
-  if (newSet && newSet !== confSet) { err.textContent = 'Admin passwords do not match.'; return; }
-  
-  const passwords = {};
-  if (newReg) passwords['Regular Volunteer'] = newReg;
-  if (newAdhoc) passwords['Adhoc Volunteer'] = newAdhoc;
-  if (newSet) passwords['Settings'] = newSet;
-  
-  if (Object.keys(passwords).length === 0) { err.textContent = 'Enter a new password.'; return; }
+  document.getElementById('card-container').innerHTML = '';
+  document.getElementById('loader-view').classList.remove('hidden');
   
   try {
-    showToast("Updating codes...");
-    await callBackend('updatePasswords', { passwords });
-    showToast("Codes updated successfully!");
-    setTimeout(() => goToLandingPage(), 1500);
+     const data = await callBackend('getTraineeCardData', { traineeName: name, profile: currentProfile });
+     document.getElementById('loader-view').classList.add('hidden');
+     renderTraineeCard(data);
   } catch (e) {
-    err.textContent = 'Error: ' + e.message;
+     document.getElementById('loader-view').classList.add('hidden');
+     showToast(e.message, true);
   }
 }
 
-// Admin Frontend-Orchestrated AI Generation
-async function handleAdminGeneration() {
-  const selected = Array.from(document.querySelectorAll('#settingsTraineeList input:checked')).map(cb => cb.value);
-  if (selected.length === 0) { showToast("Select at least 1 trainee.", true); return; }
-
-  const btn = document.getElementById('btnGenerateAdmin');
-  const progContainer = document.getElementById('generationProgressContainer');
-  const progText = document.getElementById('genProgressText');
-  const progPct = document.getElementById('genProgressPct');
-  const progBar = document.getElementById('genProgressBar');
-  const currName = document.getElementById('genCurrentName');
-
-  btn.disabled = true;
-  progContainer.classList.replace('hidden', 'block');
+function renderTraineeCard(data) {
+  let html = `<div class="glass p-5 rounded-3xl shadow-sm text-center mb-4 fade-in">`;
+  if (data.photoBase64) html += `<img src="data:${data.photoMime};base64,${data.photoBase64}" class="w-32 h-32 object-cover rounded-full mx-auto shadow-md mb-3 border-[3px] border-blue-500">`;
+  else html += `<div class="w-32 h-32 rounded-full mx-auto shadow-inner mb-3 bg-gray-200 dark:bg-gray-800 flex items-center justify-center border-[3px] border-gray-400"><i class="ph-bold ph-user text-5xl text-gray-400"></i></div>`;
+  html += `<h2 class="text-2xl font-bold leading-tight">${formatText(data.fullName)}</h2></div>`;
   
-  let successCount = 0;
-  for (let i = 0; i < selected.length; i++) {
-    const trainee = selected[i];
-    currName.textContent = `Generating for: ${trainee}...`;
-    
-    try {
-      await callBackend('generateSingleAdminInfoText', { traineeName: trainee });
-      successCount++;
-    } catch (e) {
-      console.error(`Failed generation for ${trainee}:`, e);
-    }
+  if (!data.categories || data.categories.length === 0) {
+     html += `<div class="text-center opacity-70 p-4">No specific fields assigned for viewing.</div>`;
+  } else {
+     data.categories.forEach(cat => {
+         let fieldsHtml = cat.fields.map(f => `<div class="mb-4 last:mb-0"><strong class="block text-xs uppercase tracking-widest opacity-60 mb-0.5">${f.label}</strong><div class="text-[0.95rem]">${formatText(f.value)}</div></div>`).join('');
+         html += `<details class="group p-1 rounded-2xl ${cat.bgClass} shadow-sm mb-3 transition-all duration-300 hover:shadow-md fade-in" open>
+                    <summary class="flex items-center gap-3 p-3.5 cursor-pointer select-none">
+                      <i class="ph-fill ${cat.icon} ${cat.color} text-2xl"></i>
+                      <h3 class="font-bold ${cat.color} flex-grow text-[1.1rem]">${cat.title}</h3>
+                      <i class="ph-bold ph-caret-down text-lg ${cat.color} chevron opacity-60"></i>
+                    </summary>
+                    <div class="px-5 pb-5 leading-relaxed opacity-90 border-t border-black/5 dark:border-white/5 pt-4 text-justify">
+                      ${fieldsHtml}
+                    </div>
+                  </details>`;
+     });
+  }
+  document.getElementById('card-container').innerHTML = html;
+}
 
-    const pct = Math.round(((i + 1) / selected.length) * 100);
-    progText.textContent = `Processed ${i + 1} / ${selected.length}`;
-    progPct.textContent = `${pct
+// ==========================================
+// ADMIN SETTINGS
+// ==========================================
+function toggleSettingsModal(show) { document.getElementById('modal-settings').classList.toggle('hidden', !show); }
+
+function openAdminSettingsAuth(skipPass = false) {
+  toggleSettingsModal(true);
+  document.getElementById('settings-step-auth').classList.remove('hidden');
+  document.getElementById('settings-step-edit').classList.add('hidden');
+  document.getElementById('admin-pass').value = '';
+  if (skipPass) loadAdminDashboard();
+}
+
+async function handleAdminAuth() {
+  const pass = document.getElementById('admin-pass').value;
+  const btn = document.getElementById('btn-admin-login');
+  btn.innerHTML = "Verifying..."; btn.disabled = true;
+  try {
+     const valid = await callBackend('verifySettingsPassword', { password: pass });
+     if(valid) loadAdminDashboard();
+     else { document.getElementById('admin-error-msg').classList.remove('hidden'); }
+  } catch(e) { showToast(e.message, true); }
+  btn.innerHTML = "Unlock Settings"; btn.disabled = false;
+}
+
+function loadAdminDashboard() {
+  document.getElementById('settings-step-auth').classList.add('hidden');
+  document.getElementById('settings-step-edit').classList.remove('hidden');
+  populateTraineeSelect('admin-regen-select', true);
+  
+  if(!appData) return;
+  const regDef = appData.appSettings.profileDefaultFieldMappings['Regular Volunteer'] ||[];
+  const adhocDef = appData.appSettings.profileDefaultFieldMappings['Adhoc Volunteer / Exposure Session'] ||[];
+  
+  document.getElementById('settings-regular-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${regDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');
+  document.getElementById('settings-adhoc-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${adhocDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');
+  
+  ['set-regPass', 'set-adhocPass', 'set-adminPass'].forEach(id => document.getElementById(id).value = '');
+}
+
+async function runAdminGeneration() {
+  const sel = document.getElementById('admin-regen-select').value;
+  const stat = document.getElementById('admin-regen-status');
+  const btn = document.getElementById('btn-admin-gen');
+  
+  let list = sel === 'ALL' ? appData.allTrainees : [sel];
+  if(list.length === 0) return;
+  
+  stat.classList.remove('hidden'); btn.disabled = true; btn.style.opacity = '0.5';
+  
+  for(let i=0; i<list.length; i++) {
+     stat.innerText = `Processing ${i+1}/${list.length} : ${list[i]}`;
+     try { await callBackend('adminGenerateCardText', { traineeName: list[i] }); }
+     catch(e) { console.error("Failed for", list[i], e); }
+  }
+  
+  stat.innerText = "Completed!";
+  setTimeout(() => stat.classList.add('hidden'), 3000);
+  btn.disabled = false; btn.style.opacity = '1';
+}
+
+async function handleSaveFieldSettings() {
+  const newMappings = {
+    "Regular Volunteer": Array.from(document.querySelectorAll('#settings-regular-fields input:checked')).map(cb => cb.value),
+    "Adhoc Volunteer / Exposure Session": Array.from(document.querySelectorAll('#settings-adhoc-fields input:checked')).map(cb => cb.value)
+  };
+  showToast("Saving...", false);
+  try {
+    await callBackend('saveAppSettings', { newMappings });
+    showToast("Field Settings Saved!");
+  } catch(e) { showToast(e.message, true); }
+}
+
+async function handleSavePasswords() {
+  const p = {
+    'Regular Volunteer': document.getElementById('set-regPass').value,
+    'Adhoc Volunteer': document.getElementById('set-adhocPass').value,
+    'Settings': document.getElementById('set-adminPass').value
+  };
+  if(!p['Regular Volunteer'] && !p['Adhoc Volunteer'] && !p['Settings']) return showToast("No passwords entered.", true);
+  showToast("Updating...", false);
+  try {
+    await callBackend('updatePasswords', { passwords: p });
+    showToast("Passwords Updated!");
+  } catch(e) { showToast(e.message, true); }
+}
+</script>
+</body>
+</html>
