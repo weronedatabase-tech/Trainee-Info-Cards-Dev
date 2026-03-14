@@ -88,8 +88,8 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 <body class="min-h-screen flex flex-col">
 
 <!-- Dev Mode & Toasts -->
-<div id="dev-banner" class="w-full bg-red-600 text-white text-center text-xs font-bold py-1 hidden tracking-widest uppercase">DEV MODE</div>
-<div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl hidden flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300">
+<div id="dev-banner" class="w-full bg-red-600 text-white text-center text-xs font-bold py-1 hidden tracking-widest uppercase" style="z-index: 1000;">DEV MODE</div>
+<div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 glass px-5 py-3 rounded-full shadow-2xl hidden flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300" style="z-index: 9999;">
   <span id="toast-msg">Notification</span>
 </div>
 
@@ -98,20 +98,20 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   <div class="flex justify-between items-center w-full">
     <div class="flex items-center gap-3">
       <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md"><i class="ph-bold ph-users text-white text-lg"></i></div>
-      <div class="flex flex-col"><span class="font-bold text-sm leading-none">Trainee Info</span><span class="text-[10px] opacity-60 uppercase tracking-widest mt-0.5">Mobile Portal</span></div>
+      <div class="flex flex-col"><span class="font-bold text-sm leading-none">Trainee Info</span><span class="text-xs opacity-60 uppercase tracking-widest mt-0.5">Mobile Portal</span></div>
     </div>
     <div class="flex items-center gap-2">
-       <button onclick="openAdminSettingsAuth()" class="p-1.5 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-gray-600 dark:text-gray-300 transition outline-none focus:outline-none" title="Admin Settings">
+       <button onclick="openAdminSettingsAuth()" class="p-1.5 rounded-full bg-gray-500 bg-opacity-10 hover:bg-opacity-20 text-gray-600 dark:text-gray-300 transition outline-none focus:outline-none" title="Admin Settings">
          <i class="ph-fill ph-gear text-lg"></i>
        </button>
-       <button onclick="toggleTheme()" class="p-1.5 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-sm transition outline-none focus:outline-none" title="Toggle Theme">🌗</button>
-       <button id="btn-logout" onclick="logout()" class="hidden p-1.5 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition outline-none focus:outline-none" title="Logout">
+       <button onclick="toggleTheme()" class="p-1.5 rounded-full bg-gray-500 bg-opacity-10 hover:bg-opacity-20 text-sm transition outline-none focus:outline-none" title="Toggle Theme">🌗</button>
+       <button id="btn-logout" onclick="logout()" class="hidden p-1.5 bg-red-500 bg-opacity-10 text-red-500 rounded-lg hover:bg-opacity-20 transition outline-none focus:outline-none" title="Logout">
          <i class="ph-bold ph-sign-out text-xl"></i>
        </button>
     </div>
   </div>
   <!-- Hidden by default until login -->
-  <div id="user-badge" class="hidden self-start text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-gray-500/20 text-gray-500 border border-gray-500/30">Guest</div>
+  <div id="user-badge" class="hidden self-start text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-gray-500 bg-opacity-20 text-gray-500 border border-gray-500 border-opacity-30">Guest</div>
 </header>
 
 <!-- MAIN LOGIN VIEW -->
@@ -182,15 +182,18 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 </div>
 
 <!-- FULL ADMIN SETTINGS MODAL -->
-<div id="modal-settings" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+<div id="modal-settings" class="fixed inset-0 flex items-center justify-center hidden" style="z-index: 100;">
   <div class="absolute inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" onclick="toggleSettingsModal(false)"></div>
-  <div class="glass-strong w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl p-5 md:rounded-2xl shadow-2xl relative overflow-y-auto flex flex-col fade-in">
-    <div class="flex justify-between items-center mb-4 shrink-0 border-b pb-3" style="border-color: var(--glass-border);">
+  <div class="glass-strong w-full h-full md:h-auto md:max-w-xl p-5 md:rounded-2xl shadow-2xl relative overflow-y-auto flex flex-col fade-in" style="max-height: 90vh;">
+    
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center mb-4 shrink-0 border-b border-opacity-10 pb-3" style="border-color: var(--glass-border);">
       <h2 class="text-xl font-bold flex items-center gap-2"><i class="ph-bold ph-gear text-blue-500"></i> Admin Settings</h2>
       <button onclick="toggleSettingsModal(false)" class="outline-none focus:outline-none"><i class="ph-bold ph-x text-xl opacity-60 hover:opacity-100"></i></button>
     </div>
     
-    <div class="space-y-6 pb-20">
+    <!-- Modal Content -->
+    <div class="space-y-6 pb-6">
       <!-- Generation Tool -->
       <div class="p-4 rounded-xl" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);">
           <h3 class="font-bold mb-1 flex items-center gap-2"><i class="ph-bold ph-magic-wand text-blue-500"></i> AI Card Generator</h3>
@@ -204,7 +207,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 
       <!-- Field Mapping -->
       <div>
-         <h3 class="font-bold mb-2 border-b pb-1" style="border-color: var(--glass-border);">Role Data Access Mapping</h3>
+         <h3 class="font-bold mb-2 border-b border-opacity-10 pb-1" style="border-color: var(--glass-border);">Role Data Access Mapping</h3>
          <div class="space-y-3">
              <div>
                <label class="block text-xs font-bold opacity-70 mb-1">Regular Volunteer Fields</label>
@@ -220,14 +223,20 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 
       <!-- Passwords -->
       <div>
-         <h3 class="font-bold mb-2 border-b pb-1" style="border-color: var(--glass-border);">Change Access Passwords</h3>
+         <h3 class="font-bold mb-2 border-b border-opacity-10 pb-1" style="border-color: var(--glass-border);">Change Access Passwords</h3>
          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-             <div><label class="block text-[10px] font-bold opacity-60 mb-1">REGULAR VOL.</label><input type="text" id="set-regPass" class="input-field py-1.5 px-2 text-sm"></div>
-             <div><label class="block text-[10px] font-bold opacity-60 mb-1">ADHOC VOL.</label><input type="text" id="set-adhocPass" class="input-field py-1.5 px-2 text-sm"></div>
-             <div><label class="block text-[10px] font-bold opacity-60 mb-1">ADMIN SETTINGS</label><input type="text" id="set-adminPass" class="input-field py-1.5 px-2 text-sm"></div>
+             <div><label class="block text-xs font-bold opacity-60 mb-1">REGULAR VOL.</label><input type="text" id="set-regPass" class="input-field py-1.5 px-2 text-sm"></div>
+             <div><label class="block text-xs font-bold opacity-60 mb-1">ADHOC VOL.</label><input type="text" id="set-adhocPass" class="input-field py-1.5 px-2 text-sm"></div>
+             <div><label class="block text-xs font-bold opacity-60 mb-1">ADMIN SETTINGS</label><input type="text" id="set-adminPass" class="input-field py-1.5 px-2 text-sm"></div>
          </div>
          <button onclick="handleSavePasswords()" class="bg-yellow-600 text-white w-full py-2.5 rounded-lg font-bold shadow-md mt-3 hover:opacity-90 outline-none focus:outline-none">Update Passwords Only</button>
       </div>
+
+      <!-- Close Button -->
+      <button onclick="toggleSettingsModal(false)" class="btn-secondary w-full py-2.5 rounded-lg font-bold shadow-md mt-6 outline-none focus:outline-none">
+        <i class="ph-bold ph-x text-lg"></i> Close Settings
+      </button>
+
     </div>
   </div>
 </div>
@@ -274,9 +283,13 @@ function togglePasswordIcon(btn, id) {
 function showToast(msg, isError = false) {
   const el = document.getElementById('toast');
   el.innerText = msg;
-  el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300`;
-  if(isError) el.classList.add("text-red-500", "border-red-500", "bg-red-500/10");
-  else el.classList.add("text-blue-500", "border-blue-500", "bg-blue-500/10");
+  el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300`;
+  
+  // Safe color application
+  el.classList.remove("text-red-500", "border-red-500", "bg-red-500", "bg-opacity-10", "text-blue-500", "border-blue-500", "bg-blue-500");
+  
+  if(isError) el.classList.add("text-red-500", "border-red-500", "bg-red-500", "bg-opacity-10");
+  else el.classList.add("text-blue-500", "border-blue-500", "bg-blue-500", "bg-opacity-10");
   
   if(window.tTimer) clearTimeout(window.tTimer);
   window.tTimer = setTimeout(() => el.classList.add('hidden'), 3500);
@@ -303,8 +316,8 @@ async function handleGeneralLogin() {
        const badge = document.getElementById('user-badge');
        badge.innerText = profile;
        badge.className = profile === 'Regular Volunteer' 
-          ? 'self-start text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-green-500/20 text-green-500 border border-green-500/30'
-          : 'self-start text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-yellow-500/20 text-yellow-500 border border-yellow-500/30';
+          ? 'self-start text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-green-500 bg-opacity-20 text-green-500 border border-green-500 border-opacity-30'
+          : 'self-start text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider bg-yellow-500 bg-opacity-20 text-yellow-500 border border-yellow-500 border-opacity-30';
        badge.classList.remove('hidden');
        
        // Show logout button
@@ -367,22 +380,22 @@ async function fetchTraineeInfo() {
 
 function renderTraineeCard(data) {
   let html = `<div class="glass p-5 rounded-3xl shadow-sm text-center mb-4 fade-in">`;
-  if (data.photoBase64) html += `<img src="data:${data.photoMime};base64,${data.photoBase64}" class="w-32 h-32 object-cover rounded-full mx-auto shadow-md mb-3 border-[3px] border-blue-500">`;
-  else html += `<div class="w-32 h-32 rounded-full mx-auto shadow-inner mb-3 bg-gray-200 dark:bg-gray-800 flex items-center justify-center border-[3px] border-gray-400"><i class="ph-bold ph-user text-5xl text-gray-400"></i></div>`;
+  if (data.photoBase64) html += `<img src="data:${data.photoMime};base64,${data.photoBase64}" class="w-32 h-32 object-cover rounded-full mx-auto shadow-md mb-3 border-4 border-blue-500">`;
+  else html += `<div class="w-32 h-32 rounded-full mx-auto shadow-inner mb-3 bg-gray-200 dark:bg-gray-800 flex items-center justify-center border-4 border-gray-400"><i class="ph-bold ph-user text-5xl text-gray-400"></i></div>`;
   html += `<h2 class="text-2xl font-bold leading-tight">${formatText(data.fullName)}</h2></div>`;
   
   if (!data.categories || data.categories.length === 0) {
      html += `<div class="text-center opacity-70 p-4">No specific fields assigned for viewing.</div>`;
   } else {
      data.categories.forEach(cat => {
-         let fieldsHtml = cat.fields.map(f => `<div class="mb-4 last:mb-0"><strong class="block text-xs uppercase tracking-widest opacity-60 mb-0.5">${f.label}</strong><div class="text-[0.95rem]">${formatText(f.value)}</div></div>`).join('');
+         let fieldsHtml = cat.fields.map(f => `<div class="mb-4 last:mb-0"><strong class="block text-xs uppercase tracking-widest opacity-60 mb-0.5">${f.label}</strong><div class="text-sm">${formatText(f.value)}</div></div>`).join('');
          html += `<details class="group p-1 rounded-2xl ${cat.bgClass} shadow-sm mb-3 transition-all duration-300 hover:shadow-md fade-in" open>
                     <summary class="flex items-center gap-3 p-3.5 cursor-pointer select-none">
                       <i class="ph-fill ${cat.icon} ${cat.color} text-2xl"></i>
-                      <h3 class="font-bold ${cat.color} flex-grow text-[1.1rem]">${cat.title}</h3>
+                      <h3 class="font-bold ${cat.color} flex-grow text-lg">${cat.title}</h3>
                       <i class="ph-bold ph-caret-down text-lg ${cat.color} chevron opacity-60"></i>
                     </summary>
-                    <div class="px-5 pb-5 leading-relaxed opacity-90 border-t border-black/5 dark:border-white/5 pt-4 text-justify">
+                    <div class="px-5 pb-5 leading-relaxed opacity-90 border-t border-black border-opacity-5 dark:border-white dark:border-opacity-5 pt-4 text-justify">
                       ${fieldsHtml}
                     </div>
                   </details>`;
