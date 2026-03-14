@@ -68,6 +68,8 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   ::-webkit-scrollbar-thumb { background-color: var(--input-border); border-radius: 10px; }
   ::-webkit-scrollbar-thumb:hover { background-color: var(--primary); }
 
+  html { font-size: 16px; }
+
   body { 
     font-family: 'Inter', sans-serif; 
     background-color: var(--bg-color); 
@@ -127,6 +129,9 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   .result-item.success a { color: var(--primary); text-decoration: underline; font-weight: 600; }
   .result-item.error { background-color: var(--error-bg); border-color: var(--error-border); }
 
+  /* Modal Setup */
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+
 </style>
 </head>
 <body>
@@ -159,8 +164,12 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 
   <!-- Loader View -->
   <div id="loader" class="app-view" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
-    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
-    <span id="loader-message" class="opacity-70 font-medium animate-pulse text-lg">Initializing...</span>
+    <div class="spinner animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
+    <span id="loader-message" class="opacity-70 font-medium animate-pulse text-lg text-center px-4">Initializing...</span>
+    <!-- Retry button for when connection fails -->
+    <button id="loader-retry-btn" class="btn-secondary mt-6 hidden w-auto" onclick="location.reload()">
+      <i class="ph-bold ph-arrows-clockwise"></i> Retry Connection
+    </button>
   </div>
 
   <!-- Landing / Login View -->
@@ -377,7 +386,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 </div>
 
 <!-- Password Modal Overlay -->
-<div id="password-modal" class="modal-overlay">
+<div id="password-modal" class="modal-overlay" style="display: none;">
   <!-- Click background to close -->
   <div class="absolute inset-0 bg-gray-900 bg-opacity-50" onclick="closePasswordModal()"></div>
   
@@ -424,7 +433,6 @@ function showToast(msg, isError = false) {
   const el = document.getElementById('toast');
   el.innerText = msg;
   
-  // Base classes
   el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300`;
   
   if (isError) {
@@ -433,15 +441,12 @@ function showToast(msg, isError = false) {
     el.classList.add("text-blue-500", "border-blue-500", "bg-blue-500/10");
   }
   
-  // Clear any existing timeout
   if(window.toastTimer) clearTimeout(window.toastTimer);
-  
   window.toastTimer = setTimeout(() => {
     el.classList.add('hidden');
   }, 3500);
 }
 
-// Initialize Theme
 if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
 
 // ==========================================
@@ -452,7 +457,6 @@ let totalTrainees = 0, previousAppView = '', selectedProfileForAppV1 = 'Regular 
 let profileOrSettingsToAuth = '', currentProfile = '';
 let areDefaultsSelected = true;
 
-// Original constraints mapped from backend
 const fieldsToExclude =["Project", "Trainee's Short Name", "Links for House Visit", "Map Link to Trainee's House", "SGEnable Concession Card CAN Number", "Links", "Contact Details (Home / Office / Mobile)", "Trainee's Photo"];
 const fieldNameUpdates = { "Primary Contact Name": "Contact 1 Relation (Name)", "Contact 3 Relation / Name": "Contact 3 Relation (Name)", "Age (Current Year)": "Age", "Spoken Language": "Spoken Language / Dialect" };
 let defaultFieldHeadersForAppV2Values =[];
@@ -521,6 +525,9 @@ function filterList(inputId, containerId) {
 * Main entry point utilizing DOMContentLoaded
 */
 document.addEventListener('DOMContentLoaded', () => {
+ // Force close modal in case browser aggressive cache restored it
+ closePasswordModal();
+
  if (ACTIVE_ENV === 'DEV') {
    document.getElementById('dev-banner').style.display = 'block';
  }
@@ -535,9 +542,12 @@ document.addEventListener('DOMContentLoaded', () => {
      switchView('landing-page');
    })
    .catch(err => {
-     showError(err.message);
-     document.getElementById('loader-message').innerHTML = `<span class="text-red-500 font-bold">Error:</span> ${err.message}`;
+     // Handle initial load failure cleanly
+     setLoadingState(false);
+     switchView('loader');
+     document.getElementById('loader-message').innerHTML = `<span class="text-red-500 font-bold">Connection Failed</span><br><span class="text-sm opacity-80 mt-1 block">${err.message}</span>`;
      document.querySelector('.spinner').style.display = 'none';
+     document.getElementById('loader-retry-btn').classList.remove('hidden');
    });
 });
 
@@ -547,10 +557,14 @@ function switchView(viewId) {
 }
 
 function setLoadingState(isLoading, message = 'Loading...') {
- document.querySelectorAll('button, input').forEach(el => el.disabled = isLoading);
+ // Target ONLY main app buttons to avoid disabling modal buttons accidentally
+ const mainAppElements = document.querySelectorAll('#main-app-content button, #main-app-content input, #landing-page button, #settings-page button, #settings-page input');
+ mainAppElements.forEach(el => el.disabled = isLoading);
+ 
  if (isLoading) {
    document.getElementById('loader-message').textContent = message;
-   document.querySelector('.spinner').style.display = 'block'; // Reset spinner if it was hidden
+   document.querySelector('.spinner').style.display = 'block';
+   document.getElementById('loader-retry-btn').classList.add('hidden');
    switchView('loader');
  }
 }
@@ -561,10 +575,11 @@ function promptForPassword(target) {
  const input = document.getElementById('password-input');
  const error = document.getElementById('password-modal-error');
  let displayName = target === 'Adhoc Volunteer' ? 'Adhoc Volunteer / Exposure' : target;
+ 
  title.textContent = `Login: ${displayName}`;
  error.classList.add('hidden');
  input.value = '';
- input.type = 'password'; // Reset to hidden
+ input.type = 'password';
  document.querySelector('#password-modal i').className = 'ph-bold ph-eye-slash text-xl';
  document.getElementById('password-modal').style.display = 'flex';
  
@@ -573,7 +588,7 @@ function promptForPassword(target) {
 
 function closePasswordModal() {
  document.getElementById('password-modal').style.display = 'none';
- document.activeElement.blur();
+ if (document.activeElement) document.activeElement.blur();
 }
 
 function handlePasswordSubmit() {
@@ -685,10 +700,11 @@ function handleSaveSettings() {
  callBackend('saveAppSettings', { newMappings })
    .then(() => {
        showToast("Settings Saved Successfully!");
-       setTimeout(goToLandingPage, 1000);
+       setTimeout(() => location.reload(), 1000);
    }) 
    .catch(err => {
      setLoadingState(false);
+     switchView('settings-page');
      showToast(`Failed: ${err.message}`, true);
    });
 }
@@ -720,10 +736,11 @@ function handleUpdatePasswords() {
  callBackend('updatePasswords', { passwords: passwordsToUpdate })
    .then(message => {
      showToast("Passwords Updated Successfully!");
-     setTimeout(goToLandingPage, 1500);
+     setTimeout(() => location.reload(), 1500);
    })
    .catch(err => {
      setLoadingState(false);
+     switchView('settings-page');
      errorEl.textContent = `Error: ${err.message}`;
    });
 }
@@ -851,6 +868,7 @@ function runGeneration(trainees, fields, fromView) {
  .then(displayBatchResults)
  .catch(err => {
      setLoadingState(false);
+     switchView('app-results-view');
      displayBatchResults([{ status: 'error', name: 'System Error', message: err.message }]);
  });
 }
@@ -893,18 +911,12 @@ function displayBatchResults(results) {
  switchView('app-results-view');
 }
 
-function showError(message) {
- setLoadingState(false);
- showToast(message, true);
-}
-
 function backToSelections() {
  switchView('main-app-content');
  document.getElementById(previousAppView === 'AppV1' ? 'app-v1-content' : 'app-v2-content').style.display = 'flex';
 }
 
 function goToLandingPage() {
- setLoadingState(true, 'Returning...');
  location.reload();
 }
 </script>
