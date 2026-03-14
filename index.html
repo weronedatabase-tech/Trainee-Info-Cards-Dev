@@ -61,6 +61,10 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
+  .btn-secondary { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; }
+  .btn-secondary:hover { border-color: #3b82f6; color: #3b82f6; }
+  .btn-secondary:active { transform: scale(0.98); }
+
   /* Section Styling */
   .section-basic { border-left: 4px solid #3b82f6; background: rgba(59, 130, 246, 0.05); }
   .section-medical { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); }
@@ -77,6 +81,8 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   .checkbox-list-wrapper { max-height: 200px; overflow-y: auto; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); }
   .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.4rem; padding: 0.65rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; font-size: 0.8rem; color: var(--text-color); }
   .checkbox-list-wrapper input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: #3b82f6; cursor: pointer; }
+  
+  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: center; justify-content: center; z-index: 1000; }
 </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -150,29 +156,41 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   </main>
 </div>
 
-<!-- ADMIN SETTINGS MODAL -->
+<!-- FLOATING PASSWORD MODAL FOR ADMIN SETTINGS -->
+<div id="password-modal" class="modal-overlay">
+  <div class="absolute inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" onclick="closePasswordModal()"></div>
+  <div class="glass-strong p-6 rounded-3xl w-full max-w-sm shadow-2xl relative z-10 mx-4 fade-in">
+   <div class="flex justify-between items-center mb-4">
+     <h3 class="text-lg font-bold flex items-center gap-2"><i class="ph-bold ph-lock-key text-blue-500"></i> Admin Access</h3>
+     <button onclick="closePasswordModal()" class="opacity-60 hover:opacity-100 transition-opacity outline-none focus:outline-none"><i class="ph-bold ph-x text-xl"></i></button>
+   </div>
+   
+   <form onsubmit="event.preventDefault(); handleAdminAuth();">
+     <div class="mb-6">
+       <p id="admin-error-msg" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
+       <div class="relative">
+         <input id="admin-pass" type="password" class="input-field text-center tracking-widest text-xl p-3 pr-10 w-full" placeholder="••••••••" oninput="document.getElementById('admin-error-msg').classList.add('hidden')">
+         <button type="button" onclick="togglePasswordIcon(this, 'admin-pass')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-blue-500 outline-none focus:outline-none"><i class="ph-bold ph-eye-slash text-xl"></i></button>
+       </div>
+     </div>
+     <div class="flex gap-3">
+         <button type="button" class="btn-secondary py-3" onclick="closePasswordModal()">Cancel</button>
+         <button type="submit" id="btn-admin-login" class="btn-primary py-3">Unlock</button>
+     </div>
+   </form>
+  </div>
+</div>
+
+<!-- FULL ADMIN SETTINGS MODAL -->
 <div id="modal-settings" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
   <div class="absolute inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm" onclick="toggleSettingsModal(false)"></div>
-  <div class="glass-strong w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl p-5 md:rounded-2xl shadow-2xl relative overflow-y-auto flex flex-col">
-    <div class="flex justify-between items-center mb-4 shrink-0">
-      <h2 class="text-xl font-bold flex items-center gap-2"><i class="ph-bold ph-gear text-blue-500"></i> Admin Access</h2>
+  <div class="glass-strong w-full h-full md:h-auto md:max-h-[90vh] md:max-w-xl p-5 md:rounded-2xl shadow-2xl relative overflow-y-auto flex flex-col fade-in">
+    <div class="flex justify-between items-center mb-4 shrink-0 border-b pb-3" style="border-color: var(--glass-border);">
+      <h2 class="text-xl font-bold flex items-center gap-2"><i class="ph-bold ph-gear text-blue-500"></i> Admin Settings</h2>
       <button onclick="toggleSettingsModal(false)" class="outline-none focus:outline-none"><i class="ph-bold ph-x text-xl opacity-60 hover:opacity-100"></i></button>
     </div>
     
-    <!-- Auth Step -->
-    <div id="settings-step-auth" class="flex-grow flex flex-col justify-center">
-      <p class="opacity-70 mb-4 text-sm">Enter admin password to unlock configurations.</p>
-      <form onsubmit="event.preventDefault(); handleAdminAuth();">
-        <div class="relative mb-4 text-left">
-          <p id="admin-error-msg" class="text-red-500 text-xs font-bold mb-1 hidden pl-1">Invalid Password</p>
-          <div class="relative"><input type="password" id="admin-pass" class="input-field pr-10" placeholder="••••••••" oninput="document.getElementById('admin-error-msg').classList.add('hidden')"><button type="button" onclick="togglePasswordIcon(this, 'admin-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 outline-none focus:outline-none"><i class="ph-bold ph-eye-slash text-xl"></i></button></div>
-        </div>
-        <button type="submit" id="btn-admin-login" class="btn-primary w-full">Unlock Settings</button>
-      </form>
-    </div>
-
-    <!-- Edit Step -->
-    <div id="settings-step-edit" class="hidden space-y-6 pb-20">
+    <div class="space-y-6 pb-20">
       <!-- Generation Tool -->
       <div class="p-4 rounded-xl" style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3);">
           <h3 class="font-bold mb-1 flex items-center gap-2"><i class="ph-bold ph-magic-wand text-blue-500"></i> AI Card Generator</h3>
@@ -376,31 +394,45 @@ function renderTraineeCard(data) {
 // ==========================================
 // ADMIN SETTINGS
 // ==========================================
-function toggleSettingsModal(show) { document.getElementById('modal-settings').classList.toggle('hidden', !show); }
+function toggleSettingsModal(show) { 
+  document.getElementById('modal-settings').classList.toggle('hidden', !show); 
+}
 
 function openAdminSettingsAuth(skipPass = false) {
-  toggleSettingsModal(true);
-  document.getElementById('settings-step-auth').classList.remove('hidden');
-  document.getElementById('settings-step-edit').classList.add('hidden');
-  document.getElementById('admin-pass').value = '';
-  if (skipPass) loadAdminDashboard();
+  if (skipPass) {
+     loadAdminDashboard();
+  } else {
+     document.getElementById('admin-pass').value = '';
+     document.getElementById('admin-error-msg').classList.add('hidden');
+     document.getElementById('password-modal').style.display = 'flex';
+     setTimeout(() => { try { document.getElementById('admin-pass').focus(); } catch(e) {} }, 100);
+  }
+}
+
+function closePasswordModal() {
+  document.getElementById('password-modal').style.display = 'none';
 }
 
 async function handleAdminAuth() {
   const pass = document.getElementById('admin-pass').value;
   const btn = document.getElementById('btn-admin-login');
+  if(!pass) return;
+
   btn.innerHTML = "Verifying..."; btn.disabled = true;
   try {
      const valid = await callBackend('verifySettingsPassword', { password: pass });
-     if(valid) loadAdminDashboard();
-     else { document.getElementById('admin-error-msg').classList.remove('hidden'); }
+     if(valid) {
+         closePasswordModal();
+         loadAdminDashboard();
+     } else { 
+         document.getElementById('admin-error-msg').classList.remove('hidden'); 
+     }
   } catch(e) { showToast(e.message, true); }
-  btn.innerHTML = "Unlock Settings"; btn.disabled = false;
+  btn.innerHTML = "Unlock"; btn.disabled = false;
 }
 
 function loadAdminDashboard() {
-  document.getElementById('settings-step-auth').classList.add('hidden');
-  document.getElementById('settings-step-edit').classList.remove('hidden');
+  toggleSettingsModal(true);
   populateTraineeSelect('admin-regen-select', true);
   
   if(!appData) return;
@@ -408,9 +440,7 @@ function loadAdminDashboard() {
   const adhocDef = appData.appSettings.profileDefaultFieldMappings['Adhoc Volunteer / Exposure Session'] ||[];
   
   document.getElementById('settings-regular-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${regDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');
-  document.getElementById('settings-adhoc-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${adhocDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');
-  
-  ['set-regPass', 'set-adhocPass', 'set-adminPass'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('settings-adhoc-fields').innerHTML = appData.availableFields.map(f => `<label><input type="checkbox" value="${f.label}" ${adhocDef.includes(f.label)?'checked':''}><span>${f.label}</span></label>`).join('');['set-regPass', 'set-adhocPass', 'set-adminPass'].forEach(id => document.getElementById(id).value = '');
 }
 
 async function runAdminGeneration() {
