@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Trainee Info Card Generator</title>
+<title>Trainee Info Cards</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,64 +14,50 @@
 <!-- Google Fonts (Inter) -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- ========================================== -->
-<!-- ENVIRONMENT CONFIGURATION                  -->
-<!-- ========================================== -->
 <script>
+// ==========================================
+// ENVIRONMENT CONFIGURATION
+// ==========================================
 const ACTIVE_ENV = 'DEV';
+
 const ENV_URLS = {
   PROD: "https://script.google.com/macros/s/AKfycbxvb1ps89oUF1i75Ba-9yCQFFoojLCmly_55HT2P6W7WkKJa3I6vLRWiDRS0kqcj5uYDw/exec",
   DEV: "https://script.google.com/macros/s/AKfycbz5lEH75nTIX2epTYjirnSesn0Lt7HAUrczaEYTL031haBWzNaQSw9FmOowU_5jD1TY/exec"
 };
 const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 </script>
-<!-- ========================================== -->
 
 <style>
   :root { 
     --bg-color: #f3f4f6; 
     --text-color: #111827; 
-    --glass-bg: rgba(255, 255, 255, 0.8); 
-    --glass-border: rgba(0, 0, 0, 0.1); 
+    --glass-bg: rgba(255, 255, 255, 0.85); 
+    --glass-border: rgba(0, 0, 0, 0.08); 
     --glass-strong-bg: #ffffff; 
     --input-bg: #ffffff; 
     --input-border: #d1d5db; 
-    --input-text: #111827; 
     --primary: #3b82f6; 
-    --primary-hover: #2563eb;
-    --success-bg: rgba(16, 185, 129, 0.1);
-    --success-border: #10b981;
-    --error-bg: rgba(239, 68, 68, 0.1);
-    --error-border: #ef4444;
   }
   .dark { 
     --bg-color: #0f172a; 
     --text-color: #e2e8f0; 
-    --glass-bg: rgba(30, 41, 59, 0.7); 
+    --glass-bg: rgba(30, 41, 59, 0.75); 
     --glass-border: rgba(255, 255, 255, 0.1); 
     --glass-strong-bg: rgba(15, 23, 42, 0.95); 
     --input-bg: #1e293b; 
     --input-border: #334155; 
-    --input-text: #ffffff; 
-    --primary: #3b82f6; 
-    --primary-hover: #60a5fa;
-    --success-bg: rgba(16, 185, 129, 0.15);
-    --error-bg: rgba(239, 68, 68, 0.15);
   }
 
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background-color: var(--input-border); border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background-color: var(--primary); }
-
-  html { font-size: 16px; }
 
   body { 
     font-family: 'Inter', sans-serif; 
     background-color: var(--bg-color); 
     color: var(--text-color); 
     -webkit-tap-highlight-color: transparent; 
-    transition: background-color 0.3s, color 0.3s;
     height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -84,63 +70,41 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   .fade-in { animation: fadeIn 0.3s ease-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .input-field { background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); font-size: 0.95rem; border-radius: 0.5rem; outline: none; transition: all 0.2s; padding: 0.65rem 0.75rem; }
+  .input-field { 
+    background: var(--input-bg); 
+    color: var(--text-color); 
+    border: 1px solid var(--input-border); 
+    border-radius: 0.5rem; 
+    outline: none; 
+    padding: 0.75rem; 
+  }
   .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
 
-  .search-box { padding-left: 2.5rem !important; padding-top: 0.65rem !important; padding-bottom: 0.65rem !important; }
-
-  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; font-size: 1.05rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); transition: transform 0.1s, box-shadow 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; cursor: pointer; touch-action: manipulation;}
-  .btn-primary:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }
+  .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; transition: transform 0.1s, opacity 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  .btn-secondary { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; font-size: 1.05rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; touch-action: manipulation;}
-  .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
-  .btn-secondary:active { transform: scale(0.98); }
-  .btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-  .btn-small-pill { padding: 0.25rem 0.5rem; font-size: 0.65rem; font-weight: 700; border-radius: 9999px; background-color: transparent; border: 1px solid var(--primary); color: var(--primary); cursor: pointer; transition: all 0.2s; }
-  .btn-small-pill.active { background-color: var(--primary); color: white; }
-  .btn-small-pill:hover:not(.active) { background-color: rgba(59, 130, 246, 0.1); }
-  @media (min-width: 768px) { .btn-small-pill { padding: 0.35rem 0.85rem; font-size: 0.8rem; } }
-
+  .btn-secondary { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--input-border); font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  
   .app-view { display: none; flex-direction: column; gap: 0.75rem; height: 100%; flex-grow: 1; overflow: hidden; animation: fadeIn 0.3s ease-in-out; }
-  .dialog-container { flex-grow: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 0.5rem 0.5rem 0.5rem; display: flex; flex-direction: column; overflow: hidden; }
-  @media (min-width: 768px) { .dialog-container { padding: 0 0.75rem 0.75rem 0.75rem; } }
+  .dialog-container { flex-grow: 1; width: 100%; max-width: 800px; margin: 0 auto; padding: 0 0.75rem 0.75rem 0.75rem; display: flex; flex-direction: column; overflow: hidden; }
 
-  .side-by-side-panels { display: flex; flex-direction: row; gap: 0.35rem; flex-grow: 1; overflow: hidden; }
-  @media (min-width: 768px) { .side-by-side-panels { gap: 1rem; } }
+  /* Lists */
+  .checkbox-list-wrapper { overflow-y: auto; flex-grow: 1; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); }
+  .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; font-size: 0.9rem; }
+  .checkbox-list-wrapper input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--primary); }
 
-  .stacked-panels { display: flex; flex-direction: column; gap: 0.75rem; flex-grow: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; }
-  .stacked-panels .section-panel { min-height: 400px; }
-  @media (min-width: 768px) { .stacked-panels { flex-direction: row; overflow: hidden; } .stacked-panels .section-panel { min-height: 0; height: 100%; } }
+  /* Card Layouts */
+  .trainee-row { background: var(--glass-strong-bg); border: 1px solid var(--glass-border); transition: transform 0.1s; }
+  .trainee-row:active { transform: scale(0.98); }
 
-  .section-panel { background-color: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 0.75rem; padding: 0.5rem; display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-  @media (min-width: 768px) { .section-panel { padding: 0.75rem; } }
+  /* Info Card Text Parse */
+  .parsed-section { background: var(--glass-strong-bg); border: 1px solid var(--glass-border); padding: 1rem; border-radius: 0.75rem; margin-bottom: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .parsed-section h4 { color: var(--primary); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .parsed-section p, .parsed-section ul { font-size: 0.95rem; white-space: pre-wrap; word-wrap: break-word; line-height: 1.5; }
+  .parsed-section ul { list-style-type: disc; padding-left: 1.25rem; }
 
-  .checkbox-list-wrapper { overflow-y: auto; flex-grow: 1; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); padding: 0; }
-  .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.4rem; padding: 0.65rem 0.5rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background-color 0.2s; font-size: 0.8rem; color: var(--text-color); touch-action: manipulation; }
-  .checkbox-list-wrapper label:last-child { border-bottom: none; }
-  .checkbox-list-wrapper label:hover { background-color: rgba(128, 128, 128, 0.05); }
-  .checkbox-list-wrapper input[type="checkbox"] { width: 1.1rem; height: 1.1rem; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
-  .checkbox-list-wrapper label span { flex: 1; line-height: 1.3; }
-
-  @media (min-width: 768px) {
-    .checkbox-list-wrapper label { font-size: 0.95rem; padding: 0.85rem 1rem; gap: 0.75rem; }
-    .checkbox-list-wrapper input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
-  }
-
-  .header-checkbox { width: 1.15rem; height: 1.15rem; accent-color: var(--primary); cursor: pointer; margin: 0; }
-  @media (min-width: 768px) { .header-checkbox { width: 1.35rem; height: 1.35rem; } }
-
-  /* CSS FOR INLINE CARDS (Different Dragons Style) */
-  details > summary { list-style: none; cursor: pointer; outline: none; }
-  details > summary::-webkit-details-marker { display: none; }
-  details > summary .chevron { transition: transform 0.3s; }
-  details[open] > summary .chevron { transform: rotate(180deg); }
-  details[open] > div { animation: slideDown 0.3s ease-out; }
-  @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-
-  .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
 </style>
 </head>
 <body>
@@ -151,23 +115,22 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   <span id="toast-msg">Notification</span>
 </div>
 
+<!-- Header -->
 <header class="glass sticky top-0 z-40 px-4 py-3 flex justify-between items-center shadow-sm mb-4">
   <div class="flex items-center gap-3">
     <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
       <i class="ph-bold ph-identification-card text-white text-xl"></i>
     </div>
     <div class="flex flex-col">
-      <span class="font-bold text-[1.1rem] leading-tight">Trainee Info Cards</span>
-      <span class="text-[0.65rem] opacity-60 uppercase tracking-widest leading-none">Generator Portal</span>
+      <span class="font-bold text-[1.1rem] leading-tight">Trainee Info</span>
+      <span class="text-[0.65rem] opacity-60 uppercase tracking-widest leading-none">Cards Portal</span>
     </div>
   </div>
   <div class="flex items-center gap-1">
-    <button onclick="promptForPassword('Settings')" class="p-2 text-2xl opacity-70 hover:opacity-100 transition-opacity" title="Admin Settings">
+    <button onclick="promptForPassword()" class="p-2 text-2xl opacity-70 hover:opacity-100 transition-opacity" title="Admin Settings">
       <i class="ph-bold ph-gear"></i>
     </button>
-    <button onclick="toggleTheme()" class="p-2 text-2xl opacity-70 hover:opacity-100 transition-opacity" title="Toggle Theme">
-      🌗
-    </button>
+    <button onclick="toggleTheme()" class="p-2 text-2xl opacity-70 hover:opacity-100 transition-opacity">🌗</button>
   </div>
 </header>
 
@@ -175,7 +138,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 
   <!-- Landing / Login View -->
   <div id="landing-page" class="app-view items-center justify-center pb-20">
-    <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center relative">
+    <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm shadow-xl text-center">
       <div class="mb-4 flex justify-center">
         <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg mx-auto">
            <i class="ph-bold ph-lock-key text-white text-3xl"></i>
@@ -186,224 +149,162 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
       
       <form onsubmit="event.preventDefault(); handleGeneralLogin();">
         <div class="mb-4 relative">
-          <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
+          <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1"></p>
           <div class="relative text-left">
             <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 py-3 w-full" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
-            <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i class="ph-bold ph-eye-slash text-xl"></i></button>
+            <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-blue-500"><i class="ph-bold ph-eye-slash text-xl"></i></button>
           </div>
         </div>
-        <button type="submit" id="general-login-btn" class="btn-primary py-3 w-full">
+        <button type="submit" id="general-login-btn" class="btn-primary py-3 w-full text-lg">
           <i class="ph-bold ph-sign-in text-xl"></i> Login
         </button>
       </form>
     </div>
   </div>
 
-  <main id="main-app-content" class="app-view">
-    <!-- App V1 Content (Regular - SIDE-BY-SIDE Layout) -->
-    <div id="app-v1-content" class="app-view">
-      <div class="side-by-side-panels">
-          <div class="section-panel">
-             <div class="flex flex-row items-center justify-between w-full border-b pb-2 mb-1 gap-1" style="border-color: var(--glass-border);">
-                 <div class="flex flex-row items-center gap-1 overflow-hidden shrink min-w-0">
-                   <input type="checkbox" id="checkAllTrainees" class="header-checkbox shrink-0" title="Select/Deselect All">
-                   <h2 class="font-bold text-sm md:text-lg truncate">Trainees</h2>
-                 </div>
-                 <span id="traineeCountText" class="shrink-0 text-[0.65rem] md:text-xs font-bold px-1.5 py-0.5 rounded-full bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap">0 / 0</span>
-             </div>
-             <div class="relative w-full mt-1 mb-1.5">
-               <i class="ph-bold ph-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm md:text-lg"></i>
-               <input type="text" id="traineeSearchV1" class="input-field search-box w-full text-xs md:text-base" placeholder="Search..." onkeyup="filterList('traineeSearchV1', 'traineeSelectionContainer')">
-             </div>
-             <div class="checkbox-list-wrapper shadow-inner mt-1">
-                 <div id="traineeSelectionContainer" class="flex flex-col"></div>
-             </div>
-          </div>
-
-          <div class="section-panel" id="field-selection-section">
-             <div class="flex flex-row items-center justify-between w-full border-b pb-2 mb-1 gap-1" style="border-color: var(--glass-border);">
-                 <div class="flex flex-row items-center gap-1 overflow-hidden shrink min-w-0">
-                  <input type="checkbox" id="checkAllFields" class="header-checkbox shrink-0" title="Select/Deselect All">
-                  <h2 class="font-bold text-sm md:text-lg truncate">Fields</h2>
-                 </div>
-                 <button type="button" id="defaultFieldsButton" class="btn-small-pill shrink-0 whitespace-nowrap">Default</button>
-             </div>
-             <div class="relative w-full mt-1 mb-1.5">
-               <i class="ph-bold ph-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm md:text-lg"></i>
-               <input type="text" id="fieldSearchV1" class="input-field search-box w-full text-xs md:text-base" placeholder="Search..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
-             </div>
-             <div class="checkbox-list-wrapper shadow-inner mt-1">
-                 <div id="fieldSelectionContainer" class="flex flex-col"></div>
-             </div>
-          </div>
+  <!-- Main Trainee List View -->
+  <div id="trainee-list-view" class="app-view">
+    <div class="glass flex flex-col h-full rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+      <div class="p-4 border-b" style="border-color: var(--glass-border);">
+        <h2 class="font-bold text-lg mb-3">Select Trainee</h2>
+        <div class="relative w-full">
+          <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
+          <input type="text" id="traineeSearch" class="input-field w-full pl-10" placeholder="Search by name..." onkeyup="filterTraineeList()">
+        </div>
       </div>
       
-      <div class="flex flex-col md:flex-row-reverse gap-3 mt-2 shrink-0">
-         <button type="button" id="generateButton" class="btn-primary flex-grow" onclick="handleGenerate()">
-           <i class="ph-bold ph-cards text-xl"></i> View Card(s)
-         </button>
-         <button type="button" class="btn-secondary md:w-32" onclick="goToLandingPage()">
-           <i class="ph-bold ph-sign-out text-xl"></i> Logout
-         </button>
-     </div>
-    </div>
-
-    <!-- App V2 Content (Adhoc - 1 Full Column) -->
-    <div id="app-v2-content" class="app-view">
-      <div class="section-panel h-full">
-         <div class="flex flex-row flex-nowrap items-center justify-between w-full border-b pb-3 mb-2 gap-2" style="border-color: var(--glass-border);">
-             <div class="flex flex-row items-center gap-2 overflow-hidden shrink min-w-0">
-               <input type="checkbox" id="checkAllTraineesV2" class="header-checkbox shrink-0" title="Select/Deselect All">
-               <h2 class="text-lg font-bold truncate">Select Trainee(s)</h2>
-             </div>
-             <span id="traineeCountTextV2" class="shrink-0 text-xs font-bold px-2 py-1 rounded-full bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap">0 / 0</span>
-         </div>
-         
-         <div class="relative w-full mb-1">
-           <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-           <input type="text" id="traineeSearchV2" class="input-field search-box w-full text-sm md:text-base" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV2', 'traineeSelectionContainerV2')">
-         </div>
-         <div class="checkbox-list-wrapper shadow-inner mt-2">
-             <div id="traineeSelectionContainerV2" class="flex flex-col"></div>
-         </div>
+      <div id="traineeListContainer" class="flex-grow overflow-y-auto p-2 space-y-2 pb-6 bg-gray-50/50 dark:bg-gray-900/50">
+        <!-- JS Populated -->
       </div>
-      
-      <div class="flex flex-col md:flex-row-reverse gap-3 mt-2 shrink-0">
-         <button type="button" id="generateButtonV2" class="btn-primary flex-grow" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="handleGenerateV2()">
-           <i class="ph-bold ph-cards text-xl"></i> View Card(s)
-         </button>
-         <button type="button" class="btn-secondary md:w-32" onclick="goToLandingPage()">
-           <i class="ph-bold ph-sign-out text-xl"></i> Logout
-         </button>
-     </div>
     </div>
-  </main>
+    <button type="button" class="btn-secondary mt-2 flex-shrink-0" onclick="goToLandingPage()">
+      <i class="ph-bold ph-sign-out text-xl"></i> Logout
+    </button>
+  </div>
 
-  <!-- Generation Results View (INLINE APP DISPLAY) -->
-  <div id="app-results-view" class="app-view">
-    <div class="section-panel h-full !p-0 bg-transparent border-none shadow-none flex flex-col">
-       <div class="flex flex-row items-center justify-between w-full pb-2 mb-2 shrink-0 px-1"> 
-         <h2 class="text-xl font-bold truncate">Trainee Info Cards</h2> 
-         <button type="button" class="btn-small-pill border-none bg-blue-500/10 text-blue-500 hover:bg-blue-500/20" onclick="backToSelections()">
-            <i class="ph-bold ph-arrow-u-up-left"></i> Back
-         </button>
-       </div>
-       <div id="resultMessage" class="flex-grow overflow-y-auto space-y-4 px-1 pb-10"></div>
+  <!-- Trainee Details View (Inline Card) -->
+  <div id="trainee-details-view" class="app-view">
+    <div class="flex justify-between items-center mb-2 flex-shrink-0">
+      <button onclick="backToListView()" class="btn-secondary w-auto px-4 py-2 text-sm"><i class="ph-bold ph-arrow-left text-lg"></i> Back</button>
+      <span class="font-bold opacity-70 text-sm">Trainee Profile</span>
+    </div>
+
+    <div id="cardLoadingIndicator" class="hidden flex-col items-center justify-center flex-grow">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
+      <span class="opacity-70 font-medium">Loading Profile...</span>
+    </div>
+
+    <div id="cardContentContainer" class="flex-grow overflow-y-auto pb-6 hidden flex-col gap-2">
+      <!-- Profile Header -->
+      <div class="glass-strong rounded-2xl p-6 text-center shadow-sm border border-gray-100 dark:border-gray-700 relative">
+        <div class="w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg mb-4 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+          <img id="detailPhoto" src="" class="w-full h-full object-cover hidden" alt="Photo">
+          <i id="detailPhotoFallback" class="ph-bold ph-user text-4xl text-gray-400"></i>
+        </div>
+        <h1 id="detailFullName" class="text-2xl font-bold leading-tight mb-1">Full Name</h1>
+        <p id="detailShortName" class="text-blue-500 font-semibold text-sm tracking-wide uppercase">Short Name</p>
+      </div>
+
+      <!-- Generated Text Sections -->
+      <div id="detailGeneratedText" class="flex flex-col gap-1 mt-2">
+         <!-- Parsed HTML injected here -->
+      </div>
     </div>
   </div>
 
   <!-- Settings View -->
   <div id="settings-page" class="app-view">
-   <div class="stacked-panels">
-       
-       <div class="section-panel">
-           <div class="flex flex-row items-center gap-2 w-full pb-2 mb-2 border-b" style="border-color: var(--glass-border);">
-               <input type="checkbox" id="checkAllSettingsRegular" class="header-checkbox shrink-0">
-               <h2 class="font-bold text-blue-500 text-lg truncate">Regular Fields</h2>
-           </div>
-           <div class="relative w-full">
-             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-             <input type="text" id="settingsRegularSearch" class="input-field search-box w-full text-sm md:text-base" placeholder="Search fields..." onkeyup="filterList('settingsRegularSearch', 'settings-regular-fields')">
-           </div>
-           <div class="checkbox-list-wrapper shadow-inner mt-2"><div id="settings-regular-fields" class="flex flex-col"></div></div>
-       </div>
+    <div class="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
+        
+        <!-- Generate Info Text Panel -->
+        <div class="glass flex flex-col flex-1 rounded-2xl shadow-sm p-4 overflow-hidden">
+            <div class="flex items-center gap-2 border-b pb-3 mb-3" style="border-color: var(--glass-border);">
+                <i class="ph-bold ph-robot text-xl text-blue-500"></i>
+                <h2 class="font-bold text-lg">Generate AI Profiles</h2>
+            </div>
+            <p class="text-xs opacity-70 mb-3">Check trainees to summarize and save their info to the database.</p>
+            
+            <div class="flex items-center justify-between mb-2">
+                <label class="flex items-center gap-2 text-sm font-bold cursor-pointer">
+                    <input type="checkbox" id="checkAllSettingsTrainees" class="w-4 h-4 accent-blue-500" onchange="toggleAllSettingsTrainees(this)"> Select All
+                </label>
+            </div>
+            
+            <div class="checkbox-list-wrapper shadow-inner mb-4">
+                <div id="settingsTraineeList" class="flex flex-col"></div>
+            </div>
 
-       <div class="section-panel">
-           <div class="flex flex-row items-center gap-2 w-full pb-2 mb-2 border-b" style="border-color: var(--glass-border);">
-                 <input type="checkbox" id="checkAllSettingsAdhoc" class="header-checkbox shrink-0">
-                 <h2 class="font-bold text-purple-500 text-lg truncate">Adhoc Fields</h2>
-           </div>
-           <div class="relative w-full">
-             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-             <input type="text" id="settingsAdhocSearch" class="input-field search-box w-full text-sm md:text-base" placeholder="Search fields..." onkeyup="filterList('settingsAdhocSearch', 'settings-adhoc-fields')">
-           </div>
-           <div class="checkbox-list-wrapper shadow-inner mt-2"><div id="settings-adhoc-fields" class="flex flex-col"></div></div>
-       </div>
+            <div id="generationProgressContainer" class="hidden mb-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                <div class="flex justify-between text-xs font-bold text-blue-600 dark:text-blue-400 mb-1">
+                    <span id="genProgressText">Processing 0 / 0</span>
+                    <span id="genProgressPct">0%</span>
+                </div>
+                <div class="w-full bg-blue-200 dark:bg-blue-950 rounded-full h-1.5">
+                    <div id="genProgressBar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p id="genCurrentName" class="text-xs opacity-70 mt-1 truncate">...</p>
+            </div>
 
-       <div class="section-panel h-auto min-h-0">
-           <div class="flex flex-row items-center gap-2 w-full pb-2 border-b shrink-0" style="border-color: var(--glass-border);">
-               <i class="ph-bold ph-lock-key text-xl shrink-0" style="color: var(--text-color);"></i>
-               <h2 class="font-bold text-lg truncate" style="color: var(--text-color);">Change Passwords</h2>
-           </div>
-           <div class="flex-grow overflow-y-auto pr-2 space-y-4 pt-2">
-               <div>
-                 <label class="block text-xs font-bold opacity-60 mb-1">Regular Volunteer</label>
-                 <div class="relative">
-                   <input type="password" id="new-reg-pass" class="input-field p-3 pr-10 w-full">
-                   <button type="button" onclick="togglePasswordIcon(this, 'new-reg-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-lg"></i></button>
-                 </div>
-               </div>
-               <div class="border-t" style="border-color: var(--glass-border);"></div>
-               <div>
-                 <label class="block text-xs font-bold opacity-60 mb-1">Adhoc Volunteer</label>
-                 <div class="relative">
-                   <input type="password" id="new-adhoc-pass" class="input-field p-3 pr-10 w-full">
-                   <button type="button" onclick="togglePasswordIcon(this, 'new-adhoc-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-lg"></i></button>
-                 </div>
-               </div>
-               <div class="border-t" style="border-color: var(--glass-border);"></div>
-               <div>
-                 <label class="block text-xs font-bold opacity-60 mb-1">New Settings Admin</label>
-                 <div class="relative">
-                   <input type="password" id="new-settings-pass" class="input-field p-3 pr-10 w-full">
-                   <button type="button" onclick="togglePasswordIcon(this, 'new-settings-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-lg"></i></button>
-                 </div>
-               </div>
-               <div>
-                 <label class="block text-xs font-bold opacity-60 mb-1">Confirm Settings Admin</label>
-                 <div class="relative">
-                   <input type="password" id="confirm-settings-pass" class="input-field p-3 pr-10 w-full">
-                   <button type="button" onclick="togglePasswordIcon(this, 'confirm-settings-pass')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400"><i class="ph-bold ph-eye-slash text-lg"></i></button>
-                 </div>
-               </div>
-               <p id="password-change-error" class="text-red-500 text-sm font-bold text-center"></p>
-               <button type="button" class="btn-secondary text-sm py-2" onclick="handleUpdatePasswords()"><i class="ph-bold ph-floppy-disk"></i> Save Passwords Only</button>
-           </div>
-       </div>
+            <button type="button" id="btnGenerateAdmin" class="btn-primary" onclick="handleAdminGeneration()">
+                <i class="ph-bold ph-magic-wand text-xl"></i> Generate Selected
+            </button>
+        </div>
 
-       <!-- NEW: AI GENERATION SETTINGS -->
-       <div class="section-panel h-auto min-h-0">
-           <div class="flex flex-row items-center gap-2 w-full pb-2 border-b shrink-0" style="border-color: var(--glass-border);">
-               <i class="ph-bold ph-magic-wand text-xl shrink-0" style="color: var(--text-color);"></i>
-               <h2 class="font-bold text-lg truncate" style="color: var(--text-color);">AI Generation</h2>
-           </div>
-           <div class="pt-3 space-y-3">
-               <p class="text-sm opacity-70">Pre-generate AI summaries so cards load instantly for volunteers.</p>
-               <button type="button" id="btn-ai-missing" class="btn-secondary w-full text-sm py-2" onclick="triggerAIGen('missing')"><i class="ph-bold ph-lightning"></i> Generate Missing Only</button>
-               <button type="button" id="btn-ai-all" class="btn-secondary w-full text-sm py-2 text-red-500 border-red-500/30" onclick="triggerAIGen('all')"><i class="ph-bold ph-arrows-clockwise"></i> Regenerate All (Slower)</button>
-           </div>
-       </div>
-   </div>
-   
-   <div class="flex flex-col md:flex-row-reverse gap-3 mt-2 shrink-0">
-       <button type="button" class="btn-primary bg-green-600 hover:bg-green-700 md:flex-grow" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="handleSaveSettings()">
-         <i class="ph-bold ph-floppy-disk text-xl"></i> Save Field Settings
-       </button>
-       <button type="button" class="btn-secondary md:w-32" onclick="goToLandingPage()">
-         <i class="ph-bold ph-x text-xl"></i> Close
-       </button>
-   </div>
+        <!-- Password Settings -->
+        <div class="glass flex flex-col flex-1 rounded-2xl shadow-sm p-4 overflow-y-auto">
+            <div class="flex items-center gap-2 border-b pb-3 mb-4" style="border-color: var(--glass-border);">
+                <i class="ph-bold ph-lock-key text-xl"></i>
+                <h2 class="font-bold text-lg">Access Codes</h2>
+            </div>
+            <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold opacity-70 mb-1">Regular Volunteer</label>
+                  <input type="password" id="new-reg-pass" class="input-field w-full">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold opacity-70 mb-1">Adhoc Volunteer</label>
+                  <input type="password" id="new-adhoc-pass" class="input-field w-full">
+                </div>
+                <div class="border-t pt-4" style="border-color: var(--glass-border);">
+                  <label class="block text-xs font-bold opacity-70 mb-1">Admin Settings</label>
+                  <input type="password" id="new-settings-pass" class="input-field w-full mb-2" placeholder="New Admin Pass">
+                  <input type="password" id="confirm-settings-pass" class="input-field w-full" placeholder="Confirm Admin Pass">
+                </div>
+                <p id="password-change-error" class="text-red-500 text-sm font-bold text-center"></p>
+                <button type="button" class="btn-secondary w-full py-2" onclick="handleUpdatePasswords()">
+                  <i class="ph-bold ph-floppy-disk"></i> Save Codes
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-2 flex-shrink-0">
+        <button type="button" class="btn-secondary w-full" onclick="goToLandingPage()">
+          <i class="ph-bold ph-sign-out text-xl"></i> Logout Admin
+        </button>
+    </div>
   </div>
 </div>
 
-<div id="password-modal" class="modal-overlay" style="display: none;">
-  <div class="absolute inset-0 bg-gray-900 bg-opacity-50" onclick="closePasswordModal()"></div>
+<!-- Password Modal (Admin Settings) -->
+<div id="password-modal" class="modal-overlay">
+  <div class="absolute inset-0" onclick="closePasswordModal()"></div>
   <div class="glass-strong p-6 rounded-2xl w-full max-w-sm shadow-2xl relative z-10 mx-4">
    <div class="flex justify-between items-center mb-4">
-     <h3 id="password-modal-title" class="text-lg font-bold">Admin Access</h3>
-     <button onclick="closePasswordModal()" class="opacity-60 hover:opacity-100 transition-opacity"><i class="ph-bold ph-x text-xl"></i></button>
+     <h3 class="text-lg font-bold">Admin Access</h3>
+     <button onclick="closePasswordModal()" class="opacity-60 hover:opacity-100"><i class="ph-bold ph-x text-xl"></i></button>
    </div>
-   <form onsubmit="event.preventDefault(); handlePasswordSubmit();">
-     <div class="mb-6">
+   <form onsubmit="event.preventDefault(); handleAdminAuthSubmit();">
+     <div class="mb-5 relative">
        <p id="password-modal-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
        <div class="relative">
-         <input id="password-input" type="password" class="input-field text-center tracking-widest text-xl p-3 pr-10 w-full" placeholder="••••••••" oninput="document.getElementById('password-modal-error').classList.add('hidden')">
-         <button type="button" onclick="togglePasswordIcon(this, 'password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i id="modal-password-icon" class="ph-bold ph-eye-slash text-xl"></i></button>
+         <input id="password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 w-full" placeholder="••••••••" autofocus oninput="document.getElementById('password-modal-error').classList.add('hidden')">
+         <button type="button" onclick="togglePasswordIcon(this, 'password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-blue-500"><i class="ph-bold ph-eye-slash text-xl"></i></button>
        </div>
      </div>
-     <div class="flex gap-3">
-         <button type="button" class="btn-secondary py-3" onclick="closePasswordModal()">Cancel</button>
-         <button type="submit" class="btn-primary py-3">Unlock</button>
+     <div class="flex gap-2">
+         <button type="button" class="btn-secondary flex-1" onclick="closePasswordModal()">Cancel</button>
+         <button type="submit" id="admin-auth-btn" class="btn-primary flex-1">Unlock</button>
      </div>
    </form>
   </div>
@@ -411,12 +312,63 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 
 <script>
 // ==========================================
-// THEME & UTILITY LOGIC
+// BACKGROUND INIT & DATA STATE
 // ==========================================
-function toggleTheme(save = true) {
-  const html = document.documentElement;
-  const isDark = html.classList.toggle('dark');
-  if (save) localStorage.setItem('theme', isDark ? 'dark' : 'light');
+let appData = { allTrainees:[] };
+let initPromise = null;
+let initError = null;
+
+// Fire API request instantly in the background
+function startBackgroundInit() {
+  initPromise = callBackend('getInitialData')
+    .then(data => { appData = data; })
+    .catch(err => { initError = err; });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (ACTIVE_ENV === 'DEV') document.getElementById('dev-banner').style.display = 'block';
+  if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+  
+  startBackgroundInit();
+  switchView('landing-page');
+});
+
+async function callBackend(action, payload = {}) {
+  try {
+    const response = await fetch(GAS_WEB_APP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, payload })
+    });
+    const rawText = await response.text();
+    let result;
+    try { result = JSON.parse(rawText); } 
+    catch (e) { throw new Error("Invalid response from server. Check permissions."); }
+    if (!result.success) throw new Error(result.error);
+    return result.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function waitForDataReady() {
+  if (initError) throw initError;
+  if (!initPromise) return;
+  await initPromise;
+  if (initError) throw initError;
+}
+
+// ==========================================
+// UTILITIES & THEME
+// ==========================================
+function switchView(viewId) {
+  document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
+  document.getElementById(viewId).style.display = 'flex';
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
 }
 
 function togglePasswordIcon(btn, inputId) {
@@ -429,352 +381,268 @@ function togglePasswordIcon(btn, inputId) {
 
 function showToast(msg, isError = false) {
   const el = document.getElementById('toast');
-  el.innerText = msg;
-  el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300`;
-  if (isError) el.classList.add("text-red-500", "border-red-500", "bg-red-500/10");
-  else el.classList.add("text-blue-500", "border-blue-500", "bg-blue-500/10");
-  
+  document.getElementById('toast-msg').innerText = msg;
+  el.className = `fixed top-12 left-1/2 transform -translate-x-1/2 z-[9990] glass px-5 py-3 rounded-full shadow-2xl flex items-center gap-2 text-sm font-bold whitespace-nowrap transition-all duration-300 ${isError ? "text-red-500 border-red-500 bg-red-50" : "text-blue-500 border-blue-500 bg-blue-50"}`;
   if(window.toastTimer) clearTimeout(window.toastTimer);
-  window.toastTimer = setTimeout(() => { el.classList.add('hidden'); }, 3500);
+  window.toastTimer = setTimeout(() => el.classList.add('hidden'), 3500);
 }
 
 function escapeHtml(unsafe) {
-  return typeof unsafe === 'string' ? unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;") : '';
+  if (!unsafe) return '';
+  return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
-
-if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
 
 // ==========================================
-// APP LOGIC
+// LOGIN & ROUTING
 // ==========================================
-let availableFields =[], allTrainees =[], appSettings = {};
-let totalTrainees = 0, previousAppView = '', currentProfile = '';
-let areDefaultsSelected = true;
-
-const fieldsToExclude =["Project", "Trainee's Short Name", "Links for House Visit", "Map Link to Trainee's House", "SGEnable Concession Card CAN Number", "Links", "Contact Details (Home / Office / Mobile)", "Trainee's Photo", "Trainee Info Card Text"];
-const fieldNameUpdates = { "Primary Contact Name": "Contact 1 Relation (Name)", "Contact 3 Relation / Name": "Contact 3 Relation (Name)", "Age (Current Year)": "Age", "Spoken Language": "Spoken Language / Dialect" };
-let defaultFieldHeadersForAppV2Values =[];
-let initDataPromise = null;
-
-async function callBackend(action, payload = {}) {
-  try {
-    const response = await fetch(GAS_WEB_APP_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, payload })
-    });
-    const rawText = await response.text();
-    let result;
-    try {
-      result = JSON.parse(rawText);
-    } catch (e) {
-      if (rawText.trim().startsWith('<')) throw new Error(`Received HTML page from ${ACTIVE_ENV}. Check Google Apps Script "Who has access" settings.`);
-      throw new Error("Invalid response format from server.");
-    }
-    if (!result.success) throw new Error(result.error);
-    return result.data;
-  } catch (error) {
-    if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
-       throw new Error("Connection failed/timed out. Backend permissions might be wrong, or generation took too long.");
-    }
-    throw error;
-  }
-}
-
-function filterList(inputId, containerId) {
- const input = document.getElementById(inputId);
- const filter = input.value.toUpperCase();
- const container = document.getElementById(containerId);
- const items = container.getElementsByTagName('label');
- let allVisibleAreChecked = true;
- let visibleCount = 0;
- for (let i = 0; i < items.length; i++) {
-   const span = items[i].getElementsByTagName('span')[0];
-   if (span) {
-     if ((span.textContent || span.innerText).toUpperCase().indexOf(filter) > -1) {
-       items[i].style.display = "flex";
-       visibleCount++;
-       if (!items[i].querySelector('input').checked) allVisibleAreChecked = false;
-     } else items[i].style.display = "none";
-   }
- }
- let checkAllBox;
- if (containerId.includes('traineeSelectionContainerV2')) checkAllBox = document.getElementById('checkAllTraineesV2');
- else if (containerId.includes('traineeSelectionContainer')) checkAllBox = document.getElementById('checkAllTrainees');
- else if (containerId.includes('fieldSelectionContainer')) checkAllBox = document.getElementById('checkAllFields');
- else if (containerId.includes('settings-regular-fields')) checkAllBox = document.getElementById('checkAllSettingsRegular');
- else if (containerId.includes('settings-adhoc-fields')) checkAllBox = document.getElementById('checkAllSettingsAdhoc');
- if (checkAllBox) checkAllBox.checked = visibleCount > 0 && allVisibleAreChecked;
-}
-
-/**
-* Immediate Init - No Loading Screen 
-*/
-document.addEventListener('DOMContentLoaded', () => {
- closePasswordModal(); 
- if (ACTIVE_ENV === 'DEV') document.getElementById('dev-banner').style.display = 'block';
- 
- // START BACKGROUND LOAD
- initDataPromise = callBackend('getInitialData').catch(err => {
-     console.error("Init data failed to load in background", err);
-     return { error: err.message }; 
- });
- 
- switchView('landing-page');
-});
-
-function switchView(viewId) {
- document.querySelectorAll('.app-view').forEach(v => v.style.display = 'none');
- document.getElementById(viewId).style.display = 'flex';
-}
-
-// ----------------------------------------------------
-// UNIFIED LOGIN LOGIC
-// ----------------------------------------------------
 async function handleGeneralLogin() {
   const password = document.getElementById('general-password-input').value;
   const errorEl = document.getElementById('general-login-error');
-  
-  if (!password) {
-    errorEl.textContent = 'Password cannot be empty.';
-    errorEl.classList.remove('hidden');
-    return;
-  }
+  if (!password) { errorEl.textContent = 'Enter password.'; errorEl.classList.remove('hidden'); return; }
 
-  const submitBtn = document.getElementById('general-login-btn');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Loading...';
-  submitBtn.disabled = true;
+  const btn = document.getElementById('general-login-btn');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Verifying...';
+  btn.disabled = true;
 
   try {
-    const [profile, data] = await Promise.all([
-      callBackend('login', { password }),
-      initDataPromise
-    ]);
-    
-    if (data && data.error) throw new Error(data.error);
-
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-    
-    if (profile) {
-      // Process fields once
-      if (allTrainees.length === 0 && data) {
-         appSettings = data.appSettings;
-         allTrainees = data.allTrainees;
-         availableFields = processAvailableFields(data.availableFields);
-      }
-
-      if (profile === 'Settings') loadSettingsPage();
-      else {
-        currentProfile = profile;
-        loadApp(profile === 'Regular Volunteer' ? 'AppV1' : 'AppV2', profile);
-      }
-    } else {
-      errorEl.textContent = 'Incorrect password. Please try again.';
+    const profile = await callBackend('login', { password });
+    if (!profile) {
+      errorEl.textContent = 'Incorrect password.';
       errorEl.classList.remove('hidden');
-      document.getElementById('general-password-input').select();
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+      return;
     }
-  } catch(err) {
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-    errorEl.innerHTML = err.message.includes('Unknown action') ? `Backend Error: Update Code.gs.` : `Error: ${err.message}`;
+
+    btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Loading Data...';
+    await waitForDataReady();
+
+    if (profile === 'Settings') {
+      loadSettingsPage();
+    } else {
+      loadTraineeListView();
+    }
+  } catch (err) {
+    errorEl.textContent = err.message || "Connection failed.";
     errorEl.classList.remove('hidden');
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
   }
 }
 
-function promptForPassword(target) {
- const title = document.getElementById('password-modal-title');
- const input = document.getElementById('password-input');
- const error = document.getElementById('password-modal-error');
- title.textContent = `Admin Access`;
- error.classList.add('hidden');
- input.value = '';
- input.type = 'password';
- document.getElementById('modal-password-icon').className = 'ph-bold ph-eye-slash text-xl'; 
- document.getElementById('password-modal').style.display = 'flex';
- setTimeout(() => { try { input.focus(); } catch(e) {} }, 100);
+// ==========================================
+// VOLUNTEER UI (Trainee List & Cards)
+// ==========================================
+function loadTraineeListView() {
+  const container = document.getElementById('traineeListContainer');
+  if (!appData.allTrainees || appData.allTrainees.length === 0) {
+    container.innerHTML = '<div class="p-6 text-center opacity-60 font-medium">No active trainees found.</div>';
+  } else {
+    container.innerHTML = appData.allTrainees.map(t => `
+      <button class="trainee-row w-full text-left p-4 rounded-xl flex items-center justify-between" onclick="openTraineeCard('${escapeHtml(t)}')">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center font-bold shadow-sm">
+            ${escapeHtml(t.charAt(0).toUpperCase())}
+          </div>
+          <span class="font-semibold text-base">${escapeHtml(t)}</span>
+        </div>
+        <i class="ph-bold ph-caret-right opacity-40"></i>
+      </button>
+    `).join('');
+  }
+  switchView('trainee-list-view');
 }
 
-function handlePasswordSubmit() {
- const password = document.getElementById('password-input').value;
- const errorEl = document.getElementById('password-modal-error');
- if (!password) { errorEl.textContent = 'Password cannot be empty.'; errorEl.classList.remove('hidden'); return; }
- 
- const submitBtn = document.querySelector('#password-modal button[type="submit"]');
- const originalText = submitBtn.innerText;
- submitBtn.innerText = 'Verifying...';
- submitBtn.disabled = true;
- 
- callBackend('verifySettingsPassword', { password })
-   .then(isValid => {
-     submitBtn.innerText = originalText;
-     submitBtn.disabled = false;
-     if (isValid) {
-       closePasswordModal();
-       loadSettingsPage();
-     } else {
-       errorEl.textContent = 'Incorrect admin password.';
-       errorEl.classList.remove('hidden');
-       document.getElementById('password-input').select();
-     }
-   }).catch(err => {
-     submitBtn.innerText = originalText;
-     submitBtn.disabled = false;
-     errorEl.innerHTML = `Error: ${err.message}`;
-     errorEl.classList.remove('hidden');
-   });
+function filterTraineeList() {
+  const filter = document.getElementById('traineeSearch').value.toUpperCase();
+  const rows = document.getElementById('traineeListContainer').getElementsByTagName('button');
+  for (let i = 0; i < rows.length; i++) {
+    const name = rows[i].querySelector('span').innerText;
+    rows[i].style.display = name.toUpperCase().indexOf(filter) > -1 ? "flex" : "none";
+  }
 }
 
-function processAvailableFields(fields) {
- if (!fields || !Array.isArray(fields)) return[];
- let processedFields = fields
-   .filter(field => !fieldsToExclude.includes(field.label))
-   .map(field => fieldNameUpdates[field.label] ? { label: fieldNameUpdates[field.label], value: field.value } : field);
- const contactFieldLabels =["Contact 1 Relation (Name)", "Contact 1 Number", "Contact 2 Relation (Name)", "Contact 2 Number", "Contact 3 Relation (Name)", "Contact 3 Number"];
- if (processedFields.some(f => contactFieldLabels.includes(f.label))) {
-   processedFields = processedFields.filter(f => !contactFieldLabels.includes(f.label));
-   processedFields.splice(processedFields.findIndex(f => f.label === 'Address') + 1 || processedFields.length, 0, { label: 'Caregiver Contact Info', value: 'caregiverContactInfo' });
- }
- return processedFields;
+function backToListView() {
+  switchView('trainee-list-view');
+}
+
+async function openTraineeCard(shortName) {
+  switchView('trainee-details-view');
+  document.getElementById('cardContentContainer').classList.add('hidden');
+  document.getElementById('cardLoadingIndicator').classList.replace('hidden', 'flex');
+
+  try {
+    const data = await callBackend('getTraineeCard', { traineeName: shortName });
+    
+    // Header
+    document.getElementById('detailFullName').textContent = data.fullName;
+    document.getElementById('detailShortName').textContent = data.shortName;
+    
+    const photoImg = document.getElementById('detailPhoto');
+    const fallback = document.getElementById('detailPhotoFallback');
+    if (data.photoBase64) {
+      photoImg.src = data.photoBase64;
+      photoImg.classList.remove('hidden');
+      fallback.classList.add('hidden');
+    } else {
+      photoImg.classList.add('hidden');
+      fallback.classList.remove('hidden');
+    }
+
+    // Text Content
+    const contentDiv = document.getElementById('detailGeneratedText');
+    if (!data.infoText) {
+      contentDiv.innerHTML = '<div class="text-center p-8 opacity-60 italic border border-dashed rounded-xl border-gray-300 dark:border-gray-700 mt-4">Card content has not been generated by the admin yet.</div>';
+    } else {
+      contentDiv.innerHTML = renderParsedMarkdown(data.infoText);
+    }
+
+    document.getElementById('cardLoadingIndicator').classList.replace('flex', 'hidden');
+    document.getElementById('cardContentContainer').classList.replace('hidden', 'flex');
+
+  } catch (err) {
+    document.getElementById('cardLoadingIndicator').classList.replace('flex', 'hidden');
+    showToast("Error loading profile: " + err.message, true);
+    setTimeout(backToListView, 1500);
+  }
+}
+
+function renderParsedMarkdown(text) {
+  const parts = text.split('### ');
+  let html = '';
+  parts.forEach(part => {
+    if (!part.trim()) return;
+    const lines = part.trim().split('\n');
+    const title = lines.shift();
+    let content = escapeHtml(lines.join('\n').trim());
+    
+    // Convert basic markdown bullets to HTML bullets
+    content = content.replace(/^- (.*)$/gm, '<li>$1</li>');
+    if (content.includes('<li>')) content = `<ul class="space-y-1 my-1">${content}</ul>`;
+    
+    html += `
+      <div class="parsed-section">
+        <h4>${escapeHtml(title)}</h4>
+        <div class="text-gray-800 dark:text-gray-200">${content}</div>
+      </div>
+    `;
+  });
+  return html;
+}
+
+// ==========================================
+// ADMIN SETTINGS UI
+// ==========================================
+function promptForPassword() {
+  document.getElementById('password-modal-error').classList.add('hidden');
+  const input = document.getElementById('password-input');
+  input.value = ''; input.type = 'password';
+  document.getElementById('password-modal').style.display = 'flex';
+  setTimeout(() => input.focus(), 100);
+}
+
+function closePasswordModal() {
+  document.getElementById('password-modal').style.display = 'none';
+}
+
+async function handleAdminAuthSubmit() {
+  const password = document.getElementById('password-input').value;
+  const errorEl = document.getElementById('password-modal-error');
+  const btn = document.getElementById('admin-auth-btn');
+  
+  if (!password) { errorEl.textContent = 'Enter password.'; errorEl.classList.remove('hidden'); return; }
+  
+  btn.innerText = 'Verifying...'; btn.disabled = true;
+  try {
+    const isValid = await callBackend('verifySettingsPassword', { password });
+    if (isValid) {
+      closePasswordModal();
+      btn.innerText = 'Unlock'; btn.disabled = false;
+      await waitForDataReady();
+      loadSettingsPage();
+    } else {
+      errorEl.textContent = 'Incorrect admin password.'; errorEl.classList.remove('hidden');
+      btn.innerText = 'Unlock'; btn.disabled = false;
+    }
+  } catch (err) {
+    errorEl.textContent = 'Error: ' + err.message; errorEl.classList.remove('hidden');
+    btn.innerText = 'Unlock'; btn.disabled = false;
+  }
 }
 
 function loadSettingsPage() {
- populateSettingsForm();
- switchView('settings-page');
+  const container = document.getElementById('settingsTraineeList');
+  container.innerHTML = appData.allTrainees.map(t => {
+    const id = `set-tr-${t.replace(/\W/g, '_')}`;
+    return `<label for="${id}"><input type="checkbox" value="${t}" id="${id}"><span>${t}</span></label>`;
+  }).join('');
+  document.getElementById('checkAllSettingsTrainees').checked = false;['new-reg-pass', 'new-adhoc-pass', 'new-settings-pass', 'confirm-settings-pass'].forEach(id => {
+     document.getElementById(id).value = '';
+  });
+  document.getElementById('password-change-error').textContent = '';
+  switchView('settings-page');
 }
 
-function populateSettingsForm() {
- const regularContainer = document.getElementById('settings-regular-fields');
- const adhocContainer = document.getElementById('settings-adhoc-fields');
- const allAvailableFields =[...new Set(availableFields.map(f => f.label))].sort();
- const defaultMappings = appSettings.profileDefaultFieldMappings || {};
- const regularDefaults = defaultMappings['Regular Volunteer'] ||[];
- const adhocDefaults = defaultMappings['Adhoc Volunteer / Exposure Session'] || defaultMappings['Adhoc Volunteer'] ||[];
- 
- let regularHtml =[], adhocHtml =[];
- allAvailableFields.forEach(fieldLabel => {
-   const regularId = `setting-reg-${fieldLabel.replace(/\W/g, '_')}`;
-   const adhocId = `setting-adhoc-${fieldLabel.replace(/\W/g, '_')}`;
-   regularHtml.push(`<label for="${regularId}"><input type="checkbox" value="${fieldLabel}" id="${regularId}" ${regularDefaults.includes(fieldLabel) ? 'checked' : ''}><span>${fieldLabel}</span></label>`);
-   adhocHtml.push(`<label for="${adhocId}"><input type="checkbox" value="${fieldLabel}" id="${adhocId}" ${adhocDefaults.includes(fieldLabel) ? 'checked' : ''}><span>${fieldLabel}</span></label>`);
- });
- regularContainer.innerHTML = regularHtml.join('');
- adhocContainer.innerHTML = adhocHtml.join('');
- 
- document.getElementById('checkAllSettingsRegular').addEventListener('change', function() { document.querySelectorAll('#settings-regular-fields input[type="checkbox"]').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; }); });
- document.getElementById('checkAllSettingsAdhoc').addEventListener('change', function() { document.querySelectorAll('#settings-adhoc-fields input[type="checkbox"]').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; }); });['new-reg-pass', 'new-adhoc-pass', 'new-settings-pass', 'confirm-settings-pass'].forEach(id => {
-     let el = document.getElementById(id); el.value = ''; el.type = 'password'; el.nextElementSibling.querySelector('i').className = 'ph-bold ph-eye-slash text-lg';
- });
- document.getElementById('password-change-error').textContent = '';
+function toggleAllSettingsTrainees(checkbox) {
+  document.querySelectorAll('#settingsTraineeList input[type="checkbox"]').forEach(cb => cb.checked = checkbox.checked);
 }
 
-function handleSaveSettings() {
- const btn = document.querySelector('#settings-page .btn-primary');
- btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Saving...';
- btn.disabled = true;
- const newMappings = {
-   "Regular Volunteer": Array.from(document.querySelectorAll('#settings-regular-fields input:checked')).map(cb => cb.value),
-   "Adhoc Volunteer / Exposure Session": Array.from(document.querySelectorAll('#settings-adhoc-fields input:checked')).map(cb => cb.value)
- };
- callBackend('saveAppSettings', { newMappings })
-   .then(() => { showToast("Settings Saved Successfully!"); setTimeout(() => location.reload(), 1000); }) 
-   .catch(err => { btn.innerHTML = 'Save Field Settings'; btn.disabled = false; showToast(`Failed: ${err.message}`, true); });
-}
-
-function handleUpdatePasswords() {
- const newRegPass = document.getElementById('new-reg-pass').value;
- const newAdhocPass = document.getElementById('new-adhoc-pass').value;
- const newSettingsPass = document.getElementById('new-settings-pass').value;
- const confirmSettingsPass = document.getElementById('confirm-settings-pass').value;
- const errorEl = document.getElementById('password-change-error');
- errorEl.textContent = '';
- if (newSettingsPass && newSettingsPass !== confirmSettingsPass) { errorEl.textContent = 'New Settings passwords do not match.'; return; }
- const passwordsToUpdate = {};
- if (newRegPass) passwordsToUpdate['Regular Volunteer'] = newRegPass;
- if (newAdhocPass) passwordsToUpdate['Adhoc Volunteer'] = newAdhocPass;
- if (newSettingsPass) passwordsToUpdate['Settings'] = newSettingsPass;
- if (Object.keys(passwordsToUpdate).length === 0) { errorEl.textContent = 'Please enter a new password in at least one field.'; return; }
- 
- showToast("Updating passwords...", false);
- callBackend('updatePasswords', { passwords: passwordsToUpdate })
-   .then(message => { showToast("Passwords Updated Successfully!"); setTimeout(() => location.reload(), 1500); })
-   .catch(err => { errorEl.textContent = `Error: ${err.message}`; });
-}
-
-function triggerAIGen(mode) {
-  const btnId = mode === 'missing' ? 'btn-ai-missing' : 'btn-ai-all';
-  const btn = document.getElementById(btnId);
-  const origHtml = btn.innerHTML;
-  btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Generating...';
-  btn.disabled = true;
+// Admin Password Update
+async function handleUpdatePasswords() {
+  const newReg = document.getElementById('new-reg-pass').value;
+  const newAdhoc = document.getElementById('new-adhoc-pass').value;
+  const newSet = document.getElementById('new-settings-pass').value;
+  const confSet = document.getElementById('confirm-settings-pass').value;
+  const err = document.getElementById('password-change-error');
   
-  callBackend('adminGenerateAI', { mode })
-   .then(msg => { btn.innerHTML = origHtml; btn.disabled = false; showToast(msg); })
-   .catch(err => { btn.innerHTML = origHtml; btn.disabled = false; showToast(err.message, true); });
+  err.textContent = '';
+  if (newSet && newSet !== confSet) { err.textContent = 'Admin passwords do not match.'; return; }
+  
+  const passwords = {};
+  if (newReg) passwords['Regular Volunteer'] = newReg;
+  if (newAdhoc) passwords['Adhoc Volunteer'] = newAdhoc;
+  if (newSet) passwords['Settings'] = newSet;
+  
+  if (Object.keys(passwords).length === 0) { err.textContent = 'Enter a new password.'; return; }
+  
+  try {
+    showToast("Updating codes...");
+    await callBackend('updatePasswords', { passwords });
+    showToast("Codes updated successfully!");
+    setTimeout(() => goToLandingPage(), 1500);
+  } catch (e) {
+    err.textContent = 'Error: ' + e.message;
+  }
 }
 
-function loadApp(appVersion, profile) {
- const defaultMappings = appSettings.profileDefaultFieldMappings || {};
- const adhocLabels = defaultMappings["Adhoc Volunteer / Exposure Session"] || defaultMappings["Adhoc Volunteer"] ||[];
- defaultFieldHeadersForAppV2Values = availableFields.filter(f => adhocLabels.includes(f.label)).map(f => f.value);
- 
- switchView('main-app-content');
- document.getElementById('app-v1-content').style.display = (appVersion === 'AppV1') ? 'flex' : 'none';
- document.getElementById('app-v2-content').style.display = (appVersion === 'AppV2') ? 'flex' : 'none';
- 
- if (appVersion === 'AppV1') initializeAppV1(profile);
- else initializeAppV2();
-}
+// Admin Frontend-Orchestrated AI Generation
+async function handleAdminGeneration() {
+  const selected = Array.from(document.querySelectorAll('#settingsTraineeList input:checked')).map(cb => cb.value);
+  if (selected.length === 0) { showToast("Select at least 1 trainee.", true); return; }
 
-function initializeAppV1(profile) {
- populateTraineesForView('AppV1');
- populateFieldsForAppV1(profile);
- areDefaultsSelected = true;
- document.getElementById('defaultFieldsButton').classList.add('active');
- updateFieldsBasedOnDefaults(profile);
-}
+  const btn = document.getElementById('btnGenerateAdmin');
+  const progContainer = document.getElementById('generationProgressContainer');
+  const progText = document.getElementById('genProgressText');
+  const progPct = document.getElementById('genProgressPct');
+  const progBar = document.getElementById('genProgressBar');
+  const currName = document.getElementById('genCurrentName');
 
-function initializeAppV2() { populateTraineesForView('AppV2'); }
+  btn.disabled = true;
+  progContainer.classList.replace('hidden', 'block');
+  
+  let successCount = 0;
+  for (let i = 0; i < selected.length; i++) {
+    const trainee = selected[i];
+    currName.textContent = `Generating for: ${trainee}...`;
+    
+    try {
+      await callBackend('generateSingleAdminInfoText', { traineeName: trainee });
+      successCount++;
+    } catch (e) {
+      console.error(`Failed generation for ${trainee}:`, e);
+    }
 
-function populateTraineesForView(view) {
- const containerId = view === 'AppV1' ? 'traineeSelectionContainer' : 'traineeSelectionContainerV2';
- const checkAllId = view === 'AppV1' ? 'checkAllTrainees' : 'checkAllTraineesV2';
- const container = document.getElementById(containerId);
- totalTrainees = allTrainees.length;
- if (totalTrainees === 0) {
-   container.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--text-muted-color);"><i class="ph-bold ph-warning-circle text-2xl mb-2"></i><br>No active trainees found.</div>';
-   return;
- }
- container.innerHTML = allTrainees.map(t => `<label for="${view}-${t}"><input type="checkbox" value="${t}" id="${view}-${t}"><span>${t}</span></label>`).join('');
- container.querySelectorAll('input').forEach(input => input.addEventListener('change', () => updateTraineeCountForView(view)));
- document.getElementById(checkAllId).onchange = function() {
-   document.querySelectorAll(`#${containerId} input`).forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
-   updateTraineeCountForView(view);
- };
- updateTraineeCountForView(view);
-}
-
-function updateTraineeCountForView(view) {
- const containerId = view === 'AppV1' ? 'traineeSelectionContainer' : 'traineeSelectionContainerV2';
- document.getElementById(view === 'AppV1' ? 'traineeCountText' : 'traineeCountTextV2').textContent = `${document.querySelectorAll(`#${containerId} input:checked`).length} / ${totalTrainees}`;
-}
-
-function populateFieldsForAppV1(profile) {
- const container = document.getElementById('fieldSelectionContainer');
- container.innerHTML = availableFields.map(f => `<label for="f-${f.value}"><input type="checkbox" value="${f.value}" id="f-${f.value}"><span>${f.label}</span></label>`).join('');
- document.getElementById('checkAllFields').onchange = function() {
-   document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => { if (cb.parentElement.style.display !== 'none') cb.checked = this.checked; });
-   if (this.checked) { areDefaultsSelected = false; document.getElementById('defaultFieldsButton').classList.remove('active'); }
- };
- document.getElementById('defaultFieldsButton').onclick = () => {
-   areDefaultsSelected = !areDefaultsSelected;
-   document.getElementById('defaultFieldsButton').classList.toggle('active', areDefaultsSelected);
-   if (areDefaultsSelected) document.getElementById('checkAllFields').checked = false;
-   updateFieldsBasedOnDefaults(profile);
- }
-}
-
-function updateFieldsBasedOnDefaults(profile) {
- const defaultMappings = appSettings.profileDefaultFieldMappings || {};
- const defaultLabels = defaultMappings[profile] ||
+    const pct = Math.round(((i + 1) / selected.length) * 100);
+    progText.textContent = `Processed ${i + 1} / ${selected.length}`;
+    progPct.textContent = `${pct
