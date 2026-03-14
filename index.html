@@ -151,13 +151,18 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
       <i class="ph-bold ph-identification-card text-white text-xl"></i>
     </div>
     <div class="flex flex-col">
-      <span class="font-bold text-[1.1rem] leading-tight">Info Cards</span>
+      <span class="font-bold text-[1.1rem] leading-tight">Trainee Info Cards</span>
       <span class="text-[0.65rem] opacity-60 uppercase tracking-widest leading-none">Generator Portal</span>
     </div>
   </div>
-  <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-500/10 hover:bg-gray-500/20 text-lg border border-gray-500/20 transition-colors" title="Toggle Theme">
-    🌗
-  </button>
+  <div class="flex items-center gap-1">
+    <button onclick="promptForPassword('Settings')" class="p-2 text-2xl text-gray-600 dark:text-gray-300 hover:text-primary transition-colors" title="Admin Settings">
+      <i class="ph-bold ph-gear"></i>
+    </button>
+    <button onclick="toggleTheme()" class="p-2 text-2xl text-gray-600 dark:text-gray-300 hover:text-primary transition-colors" title="Toggle Theme">
+      🌗
+    </button>
+  </div>
 </header>
 
 <div class="dialog-container">
@@ -166,7 +171,6 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   <div id="loader" class="app-view" style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
     <div class="spinner animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-4"></div>
     <span id="loader-message" class="opacity-70 font-medium animate-pulse text-lg text-center px-4">Initializing...</span>
-    <!-- Retry button for when connection fails -->
     <button id="loader-retry-btn" class="btn-secondary mt-6 hidden w-auto" onclick="location.reload()">
       <i class="ph-bold ph-arrows-clockwise"></i> Retry Connection
     </button>
@@ -174,24 +178,26 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
 
   <!-- Landing / Login View -->
   <div id="landing-page" class="app-view items-center justify-center pb-20">
-    <div class="glass p-6 md:p-8 rounded-2xl w-full max-w-md shadow-2xl text-center">
-      <h2 class="text-xl font-bold mb-2">Select Volunteer Profile</h2>
-      <p class="opacity-70 mb-6 text-sm">Choose your access level to begin generating trainee cards.</p>
-      
-      <div class="flex flex-col gap-3">
-          <button type="button" class="btn-primary" onclick="promptForPassword('Regular Volunteer')">
-            <i class="ph-bold ph-user text-xl"></i> Regular Volunteer
-          </button>
-          <button type="button" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="promptForPassword('Adhoc Volunteer')">
-            <i class="ph-bold ph-users-three text-xl"></i> Adhoc / Exposure Session
-          </button>
-          
-          <div class="border-t border-gray-300 dark:border-gray-700 my-3"></div>
-          
-          <button type="button" id="settingsButton" class="btn-secondary" onclick="promptForPassword('Settings')">
-            <i class="ph-bold ph-gear text-xl"></i> Admin Settings
-          </button>
+    <div class="glass p-6 md:p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center relative">
+      <div class="mb-4 flex justify-center">
+        <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center shadow-lg mx-auto">
+           <i class="ph-bold ph-lock-key text-white text-3xl"></i>
+        </div>
       </div>
+      <h2 class="text-2xl font-bold mb-2">Access Portal</h2>
+      <p class="opacity-70 mb-6 text-sm">Enter your access code to continue.</p>
+      
+      <!-- Generic Password Form -->
+      <form onsubmit="event.preventDefault(); handleGeneralLogin();">
+        <div class="relative mb-4 text-left">
+          <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 py-3" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
+          <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i class="ph-bold ph-eye-slash text-xl"></i></button>
+        </div>
+        <p id="general-login-error" class="text-red-500 text-sm font-bold mb-4 hidden">Invalid password</p>
+        <button type="submit" id="general-login-btn" class="btn-primary py-3 w-full">
+          <i class="ph-bold ph-sign-in text-xl"></i> Login
+        </button>
+      </form>
     </div>
   </div>
 
@@ -244,7 +250,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
            <i class="ph-bold ph-magic-wand text-xl"></i> Generate Card(s)
          </button>
          <button type="button" id="backToProfilesButtonV1" class="btn-secondary md:w-32" onclick="goToLandingPage()">
-           <i class="ph-bold ph-arrow-left text-xl"></i> Back
+           <i class="ph-bold ph-sign-out text-xl"></i> Logout
          </button>
      </div>
     </div>
@@ -273,7 +279,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
            <i class="ph-bold ph-magic-wand text-xl"></i> Generate Card(s)
          </button>
          <button type="button" id="backToProfilesButtonV2" class="btn-secondary md:w-32" onclick="goToLandingPage()">
-           <i class="ph-bold ph-arrow-left text-xl"></i> Back
+           <i class="ph-bold ph-sign-out text-xl"></i> Logout
          </button>
      </div>
     </div>
@@ -385,14 +391,14 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   </div>
 </div>
 
-<!-- Password Modal Overlay -->
+<!-- Settings/Specific Password Modal Overlay (Used when gear icon is clicked) -->
 <div id="password-modal" class="modal-overlay" style="display: none;">
   <!-- Click background to close -->
   <div class="absolute inset-0 bg-gray-900 bg-opacity-50" onclick="closePasswordModal()"></div>
   
   <div class="glass-strong p-6 rounded-2xl w-full max-w-sm shadow-2xl relative z-10 mx-4">
    <div class="flex justify-between items-center mb-4">
-     <h3 id="password-modal-title" class="text-lg font-bold">Enter Password</h3>
+     <h3 id="password-modal-title" class="text-lg font-bold">Admin Access</h3>
      <button onclick="closePasswordModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="ph-bold ph-x text-xl"></i></button>
    </div>
    
@@ -525,8 +531,7 @@ function filterList(inputId, containerId) {
 * Main entry point utilizing DOMContentLoaded
 */
 document.addEventListener('DOMContentLoaded', () => {
- // Force close modal in case browser aggressive cache restored it
- closePasswordModal();
+ closePasswordModal(); // Force close any cached modals
 
  if (ACTIVE_ENV === 'DEV') {
    document.getElementById('dev-banner').style.display = 'block';
@@ -542,7 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
      switchView('landing-page');
    })
    .catch(err => {
-     // Handle initial load failure cleanly
      setLoadingState(false);
      switchView('loader');
      document.getElementById('loader-message').innerHTML = `<span class="text-red-500 font-bold">Connection Failed</span><br><span class="text-sm opacity-80 mt-1 block">${err.message}</span>`;
@@ -557,7 +561,6 @@ function switchView(viewId) {
 }
 
 function setLoadingState(isLoading, message = 'Loading...') {
- // Target ONLY main app buttons to avoid disabling modal buttons accidentally
  const mainAppElements = document.querySelectorAll('#main-app-content button, #main-app-content input, #landing-page button, #settings-page button, #settings-page input');
  mainAppElements.forEach(el => el.disabled = isLoading);
  
@@ -569,14 +572,60 @@ function setLoadingState(isLoading, message = 'Loading...') {
  }
 }
 
+// ----------------------------------------------------
+// NEW UNIFIED LOGIN LOGIC
+// ----------------------------------------------------
+function handleGeneralLogin() {
+  const password = document.getElementById('general-password-input').value;
+  const errorEl = document.getElementById('general-login-error');
+  
+  if (!password) {
+    errorEl.textContent = 'Password cannot be empty.';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
+  const submitBtn = document.getElementById('general-login-btn');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<i class="ph-bold ph-spinner animate-spin text-xl"></i> Verifying...';
+  submitBtn.disabled = true;
+
+  callBackend('login', { password })
+    .then(profile => {
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+      
+      if (profile) {
+        if (profile === 'Settings') {
+          loadSettingsPage();
+        } else {
+          currentProfile = profile;
+          const appVersion = profile === 'Regular Volunteer' ? 'AppV1' : 'AppV2';
+          loadApp(appVersion, currentProfile);
+        }
+      } else {
+        errorEl.textContent = 'Incorrect password. Please try again.';
+        errorEl.classList.remove('hidden');
+        document.getElementById('general-password-input').select();
+      }
+    })
+    .catch(err => {
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+      showToast(`Login Failed: ${err.message}`, true);
+    });
+}
+
+// ----------------------------------------------------
+// SETTINGS GEAR ICON LOGIC
+// ----------------------------------------------------
 function promptForPassword(target) {
- profileOrSettingsToAuth = target;
+ profileOrSettingsToAuth = target; // Will usually be 'Settings'
  const title = document.getElementById('password-modal-title');
  const input = document.getElementById('password-input');
  const error = document.getElementById('password-modal-error');
- let displayName = target === 'Adhoc Volunteer' ? 'Adhoc Volunteer / Exposure' : target;
  
- title.textContent = `Login: ${displayName}`;
+ title.textContent = `Admin Access`;
  error.classList.add('hidden');
  input.value = '';
  input.type = 'password';
@@ -605,25 +654,16 @@ function handlePasswordSubmit() {
  submitBtn.innerText = 'Verifying...';
  submitBtn.disabled = true;
  
- const action = profileOrSettingsToAuth === 'Settings' ? 'verifySettingsPassword' : 'verifyPassword';
- const payload = profileOrSettingsToAuth === 'Settings' ? { password } : { profile: profileOrSettingsToAuth, password };
-
- callBackend(action, payload)
+ callBackend('verifySettingsPassword', { password })
    .then(isValid => {
      submitBtn.innerText = originalText;
      submitBtn.disabled = false;
      
      if (isValid) {
        closePasswordModal();
-       if (profileOrSettingsToAuth === 'Settings') {
-         loadSettingsPage();
-       } else {
-         currentProfile = profileOrSettingsToAuth;
-         const appVersion = profileOrSettingsToAuth === 'Regular Volunteer' ? 'AppV1' : 'AppV2';
-         loadApp(appVersion, currentProfile);
-       }
+       loadSettingsPage();
      } else {
-       errorEl.textContent = 'Incorrect password. Please try again.';
+       errorEl.textContent = 'Incorrect admin password.';
        errorEl.classList.remove('hidden');
        document.getElementById('password-input').select();
      }
