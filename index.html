@@ -88,7 +88,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   .fade-in { animation: fadeIn 0.3s ease-out; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .input-field { background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); font-size: 0.95rem; border-radius: 0.5rem; outline: none; transition: all 0.2s; }
+  .input-field { background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); font-size: 0.95rem; border-radius: 0.5rem; outline: none; transition: all 0.2s; padding: 0.65rem 0.75rem; }
   .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3); }
 
   .btn-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; font-weight: 600; padding: 0.75rem 1.5rem; border-radius: 0.5rem; width: 100%; font-size: 1.05rem; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); transition: transform 0.1s, box-shadow 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border: none; cursor: pointer; }
@@ -107,14 +107,50 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   /* App Structure Layout */
   .app-view { display: none; flex-direction: column; gap: 0.75rem; height: 100%; flex-grow: 1; overflow: hidden; animation: fadeIn 0.3s ease-in-out; }
   .dialog-container { flex-grow: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 0.75rem 0.75rem 0.75rem; display: flex; flex-direction: column; overflow: hidden; }
-  .panels-container { display: flex; flex-direction: column; gap: 0.75rem; flex-grow: 1; overflow: hidden; }
-  @media (min-width: 768px) { .panels-container { flex-direction: row; } }
   
-  .section-panel { background-color: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--glass-border); border-radius: 0.75rem; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; flex: 1; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+  /* MOBILE SCROLLING FIX FOR PANELS */
+  .panels-container { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 1rem; 
+    flex-grow: 1; 
+    overflow-y: auto; /* Enable outer scrolling on mobile */
+    overflow-x: hidden; 
+    padding-bottom: 0.5rem; 
+    -webkit-overflow-scrolling: touch;
+  }
+  @media (min-width: 768px) { 
+    .panels-container { flex-direction: row; overflow: hidden; } 
+  }
+  
+  /* Guarantee massive lists aren't squished */
+  .section-panel { 
+    background-color: var(--glass-bg); 
+    backdrop-filter: blur(12px); 
+    -webkit-backdrop-filter: blur(12px); 
+    border: 1px solid var(--glass-border); 
+    border-radius: 0.75rem; 
+    padding: 0.75rem; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.6rem; 
+    flex: none; 
+    min-height: 400px; /* Minimum height on mobile */
+    height: 45vh; 
+    overflow: hidden; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); 
+  }
+  
+  /* Override for views that only have ONE panel so it takes full height */
+  .section-panel.h-full { min-height: 0; height: 100%; flex: 1; }
+
+  @media (min-width: 768px) { 
+    .section-panel { flex: 1; min-height: 0; height: auto; } 
+  }
 
   /* Checkbox Lists */
   .checkbox-list-wrapper { overflow-y: auto; flex-grow: 1; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); padding: 0; }
-  .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background-color 0.2s; font-size: 0.95rem; color: var(--text-color); touch-action: manipulation; }
+  .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.85rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background-color 0.2s; font-size: 0.95rem; color: var(--text-color); touch-action: manipulation; }
   .checkbox-list-wrapper label:last-child { border-bottom: none; }
   .checkbox-list-wrapper label:hover { background-color: rgba(128, 128, 128, 0.05); }
   .checkbox-list-wrapper input[type="checkbox"] { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
@@ -192,7 +228,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
         <div class="mb-4 relative">
           <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
           <div class="relative text-left">
-            <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 p-3 w-full" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
+            <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 py-3 w-full" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
             <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i id="general-password-icon" class="ph-bold ph-eye-slash text-xl"></i></button>
           </div>
         </div>
@@ -222,7 +258,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
              
              <div class="relative w-full">
                <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-               <input type="text" id="traineeSearchV1" class="input-field py-2.5 pr-3 pl-10 w-full" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV1', 'traineeSelectionContainer')">
+               <input type="text" id="traineeSearchV1" class="input-field pl-10 w-full" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV1', 'traineeSelectionContainer')">
              </div>
              <div class="checkbox-list-wrapper shadow-inner mt-2">
                  <div id="traineeSelectionContainer" class="flex flex-col"></div>
@@ -241,7 +277,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
              
              <div class="relative w-full">
                <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-               <input type="text" id="fieldSearchV1" class="input-field py-2.5 pr-3 pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
+               <input type="text" id="fieldSearchV1" class="input-field pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
              </div>
              <div class="checkbox-list-wrapper shadow-inner mt-2">
                  <div id="fieldSelectionContainer" class="flex flex-col"></div>
@@ -272,7 +308,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
          
          <div class="relative w-full">
            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-           <input type="text" id="traineeSearchV2" class="input-field py-2.5 pr-3 pl-10 w-full" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV2', 'traineeSelectionContainerV2')">
+           <input type="text" id="traineeSearchV2" class="input-field pl-10 w-full" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV2', 'traineeSelectionContainerV2')">
          </div>
          <div class="checkbox-list-wrapper shadow-inner mt-2">
              <div id="traineeSelectionContainerV2" class="flex flex-col"></div>
@@ -322,7 +358,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
            </div>
            <div class="relative w-full">
              <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-             <input type="text" id="settingsRegularSearch" class="input-field py-2.5 pr-3 pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('settingsRegularSearch', 'settings-regular-fields')">
+             <input type="text" id="settingsRegularSearch" class="input-field pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('settingsRegularSearch', 'settings-regular-fields')">
            </div>
            <div class="checkbox-list-wrapper shadow-inner mt-2"><div id="settings-regular-fields" class="flex flex-col"></div></div>
        </div>
@@ -335,7 +371,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
            </div>
            <div class="relative w-full">
              <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-             <input type="text" id="settingsAdhocSearch" class="input-field py-2.5 pr-3 pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('settingsAdhocSearch', 'settings-adhoc-fields')">
+             <input type="text" id="settingsAdhocSearch" class="input-field pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('settingsAdhocSearch', 'settings-adhoc-fields')">
            </div>
            <div class="checkbox-list-wrapper shadow-inner mt-2"><div id="settings-adhoc-fields" class="flex flex-col"></div></div>
        </div>
