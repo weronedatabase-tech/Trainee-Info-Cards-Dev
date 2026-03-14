@@ -100,64 +100,92 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   .btn-secondary:active { transform: scale(0.98); }
   .btn-secondary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-  .btn-small-pill { padding: 0.35rem 0.85rem; font-size: 0.8rem; font-weight: 600; border-radius: 9999px; background-color: transparent; border: 1px solid var(--primary); color: var(--primary); cursor: pointer; transition: all 0.2s; }
+  /* Compact Default Button */
+  .btn-small-pill { padding: 0.25rem 0.5rem; font-size: 0.65rem; font-weight: 700; border-radius: 9999px; background-color: transparent; border: 1px solid var(--primary); color: var(--primary); cursor: pointer; transition: all 0.2s; }
   .btn-small-pill.active { background-color: var(--primary); color: white; }
   .btn-small-pill:hover:not(.active) { background-color: rgba(59, 130, 246, 0.1); }
+  @media (min-width: 768px) { .btn-small-pill { padding: 0.35rem 0.85rem; font-size: 0.8rem; } }
 
   /* App Structure Layout */
   .app-view { display: none; flex-direction: column; gap: 0.75rem; height: 100%; flex-grow: 1; overflow: hidden; animation: fadeIn 0.3s ease-in-out; }
-  .dialog-container { flex-grow: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 0.75rem 0.75rem 0.75rem; display: flex; flex-direction: column; overflow: hidden; }
-  
-  /* MOBILE SCROLLING FIX FOR PANELS */
-  .panels-container { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 1rem; 
-    flex-grow: 1; 
-    overflow-y: auto; /* Enable outer scrolling on mobile */
-    overflow-x: hidden; 
-    padding-bottom: 0.5rem; 
+  .dialog-container { flex-grow: 1; width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 0.5rem 0.5rem 0.5rem; display: flex; flex-direction: column; overflow: hidden; }
+  @media (min-width: 768px) { .dialog-container { padding: 0 0.75rem 0.75rem 0.75rem; } }
+
+  /* -------------------------------------------
+     LAYOUT: SIDE-BY-SIDE PANELS (App V1)
+  ------------------------------------------- */
+  .side-by-side-panels {
+    display: flex;
+    flex-direction: row;
+    gap: 0.35rem; /* Tight gap for mobile */
+    flex-grow: 1;
+    overflow: hidden;
+  }
+  @media (min-width: 768px) { .side-by-side-panels { gap: 1rem; } }
+
+  /* -------------------------------------------
+     LAYOUT: STACKED PANELS (Settings)
+  ------------------------------------------- */
+  .stacked-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 0.5rem;
     -webkit-overflow-scrolling: touch;
   }
-  @media (min-width: 768px) { 
-    .panels-container { flex-direction: row; overflow: hidden; } 
+  .stacked-panels .section-panel { min-height: 400px; }
+  @media (min-width: 768px) {
+    .stacked-panels { flex-direction: row; overflow: hidden; }
+    .stacked-panels .section-panel { min-height: 0; height: 100%; }
   }
-  
-  /* Guarantee massive lists aren't squished */
+
+  /* Universal Section Panel */
   .section-panel { 
     background-color: var(--glass-bg); 
     backdrop-filter: blur(12px); 
     -webkit-backdrop-filter: blur(12px); 
     border: 1px solid var(--glass-border); 
     border-radius: 0.75rem; 
-    padding: 0.75rem; 
+    padding: 0.5rem; 
     display: flex; 
     flex-direction: column; 
-    gap: 0.6rem; 
-    flex: none; 
-    min-height: 400px; /* Minimum height on mobile */
-    height: 45vh; 
+    flex: 1; 
+    min-width: 0; /* CRITICAL to prevent flex overflow on side-by-side */
     overflow: hidden; 
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); 
   }
-  
-  /* Override for views that only have ONE panel so it takes full height */
-  .section-panel.h-full { min-height: 0; height: 100%; flex: 1; }
+  @media (min-width: 768px) { .section-panel { padding: 0.75rem; } }
 
-  @media (min-width: 768px) { 
-    .section-panel { flex: 1; min-height: 0; height: auto; } 
-  }
-
-  /* Checkbox Lists */
+  /* Dynamic Checkbox Lists (Responds to space) */
   .checkbox-list-wrapper { overflow-y: auto; flex-grow: 1; background-color: var(--input-bg); border-radius: 0.5rem; border: 1px solid var(--input-border); padding: 0; }
-  .checkbox-list-wrapper label { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0.85rem; border-bottom: 1px solid var(--glass-border); cursor: pointer; transition: background-color 0.2s; font-size: 0.95rem; color: var(--text-color); touch-action: manipulation; }
+  .checkbox-list-wrapper label { 
+    display: flex; 
+    align-items: center; 
+    gap: 0.4rem; 
+    padding: 0.65rem 0.5rem; 
+    border-bottom: 1px solid var(--glass-border); 
+    cursor: pointer; 
+    transition: background-color 0.2s; 
+    font-size: 0.8rem; 
+    color: var(--text-color); 
+    touch-action: manipulation; 
+  }
   .checkbox-list-wrapper label:last-child { border-bottom: none; }
   .checkbox-list-wrapper label:hover { background-color: rgba(128, 128, 128, 0.05); }
-  .checkbox-list-wrapper input[type="checkbox"] { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
+  .checkbox-list-wrapper input[type="checkbox"] { width: 1.1rem; height: 1.1rem; flex-shrink: 0; accent-color: var(--primary); cursor: pointer; }
   .checkbox-list-wrapper label span { flex: 1; line-height: 1.3; }
 
-  /* Generic Checkbox */
-  .header-checkbox { width: 1.35rem; height: 1.35rem; accent-color: var(--primary); cursor: pointer; }
+  @media (min-width: 768px) {
+    .checkbox-list-wrapper label { font-size: 0.95rem; padding: 0.85rem 1rem; gap: 0.75rem; }
+    .checkbox-list-wrapper input[type="checkbox"] { width: 1.25rem; height: 1.25rem; }
+  }
+
+  /* Generic Header Checkbox */
+  .header-checkbox { width: 1.15rem; height: 1.15rem; accent-color: var(--primary); cursor: pointer; margin: 0; }
+  @media (min-width: 768px) { .header-checkbox { width: 1.35rem; height: 1.35rem; } }
 
   /* Results Styling */
   .result-item { display: flex; gap: 0.75rem; align-items: flex-start; padding: 1rem; border-radius: 0.5rem; border: 1px solid; font-size: 0.95rem; word-break: break-word; flex-shrink: 0; }
@@ -242,44 +270,44 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   <!-- Main App View -->
   <main id="main-app-content" class="app-view">
     
-    <!-- App V1 Content (Regular) -->
+    <!-- App V1 Content (Regular - SIDE-BY-SIDE Layout) -->
     <div id="app-v1-content" class="app-view">
-      <div class="panels-container">
+      <div class="side-by-side-panels">
           
           <!-- Trainee Panel -->
           <div class="section-panel">
-             <div class="flex flex-row flex-nowrap items-center justify-between w-full border-b pb-3 mb-2 gap-2" style="border-color: var(--glass-border);">
-                 <div class="flex flex-row items-center gap-2 overflow-hidden">
+             <div class="flex flex-row items-center justify-between w-full border-b pb-2 mb-1 gap-1" style="border-color: var(--glass-border);">
+                 <div class="flex flex-row items-center gap-1 overflow-hidden shrink min-w-0">
                    <input type="checkbox" id="checkAllTrainees" class="header-checkbox shrink-0" title="Select/Deselect All">
-                   <h2 class="font-bold text-lg truncate">Select Trainee(s)</h2>
+                   <h2 class="font-bold text-sm md:text-lg truncate">Trainees</h2>
                  </div>
-                 <span id="traineeCountText" class="shrink-0 text-xs font-bold px-2 py-1 rounded-full bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap">0 / 0</span>
+                 <span id="traineeCountText" class="shrink-0 text-[0.65rem] md:text-xs font-bold px-1.5 py-0.5 rounded-full bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap">0 / 0</span>
              </div>
              
-             <div class="relative w-full">
-               <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-               <input type="text" id="traineeSearchV1" class="input-field pl-10 w-full" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV1', 'traineeSelectionContainer')">
+             <div class="relative w-full mt-1 mb-1.5">
+               <i class="ph-bold ph-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm md:text-lg"></i>
+               <input type="text" id="traineeSearchV1" class="input-field py-1.5 md:py-2 pr-2 pl-7 md:pl-10 w-full text-xs md:text-base" placeholder="Search..." onkeyup="filterList('traineeSearchV1', 'traineeSelectionContainer')">
              </div>
-             <div class="checkbox-list-wrapper shadow-inner mt-2">
+             <div class="checkbox-list-wrapper shadow-inner mt-1">
                  <div id="traineeSelectionContainer" class="flex flex-col"></div>
              </div>
           </div>
 
           <!-- Fields Panel -->
           <div class="section-panel" id="field-selection-section">
-             <div class="flex flex-row flex-nowrap items-center justify-between w-full border-b pb-3 mb-2 gap-2" style="border-color: var(--glass-border);">
-                 <div class="flex flex-row items-center gap-2 overflow-hidden">
+             <div class="flex flex-row items-center justify-between w-full border-b pb-2 mb-1 gap-1" style="border-color: var(--glass-border);">
+                 <div class="flex flex-row items-center gap-1 overflow-hidden shrink min-w-0">
                   <input type="checkbox" id="checkAllFields" class="header-checkbox shrink-0" title="Select/Deselect All">
-                  <h2 class="font-bold text-lg truncate">Select Fields</h2>
+                  <h2 class="font-bold text-sm md:text-lg truncate">Fields</h2>
                  </div>
-                 <button type="button" id="defaultFieldsButton" class="btn-small-pill shrink-0 whitespace-nowrap">Default Fields</button>
+                 <button type="button" id="defaultFieldsButton" class="btn-small-pill shrink-0 whitespace-nowrap">Default</button>
              </div>
              
-             <div class="relative w-full">
-               <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-               <input type="text" id="fieldSearchV1" class="input-field pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
+             <div class="relative w-full mt-1 mb-1.5">
+               <i class="ph-bold ph-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm md:text-lg"></i>
+               <input type="text" id="fieldSearchV1" class="input-field py-1.5 md:py-2 pr-2 pl-7 md:pl-10 w-full text-xs md:text-base" placeholder="Search..." onkeyup="filterList('fieldSearchV1', 'fieldSelectionContainer')">
              </div>
-             <div class="checkbox-list-wrapper shadow-inner mt-2">
+             <div class="checkbox-list-wrapper shadow-inner mt-1">
                  <div id="fieldSelectionContainer" class="flex flex-col"></div>
              </div>
           </div>
@@ -295,20 +323,20 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
      </div>
     </div>
 
-    <!-- App V2 Content (Adhoc) -->
+    <!-- App V2 Content (Adhoc - 1 Full Column) -->
     <div id="app-v2-content" class="app-view">
       <div class="section-panel h-full">
          <div class="flex flex-row flex-nowrap items-center justify-between w-full border-b pb-3 mb-2 gap-2" style="border-color: var(--glass-border);">
-             <div class="flex flex-row items-center gap-2 overflow-hidden">
+             <div class="flex flex-row items-center gap-2 overflow-hidden shrink min-w-0">
                <input type="checkbox" id="checkAllTraineesV2" class="header-checkbox shrink-0" title="Select/Deselect All">
                <h2 class="text-lg font-bold truncate">Select Trainee(s)</h2>
              </div>
              <span id="traineeCountTextV2" class="shrink-0 text-xs font-bold px-2 py-1 rounded-full bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap">0 / 0</span>
          </div>
          
-         <div class="relative w-full">
+         <div class="relative w-full mb-1">
            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-           <input type="text" id="traineeSearchV2" class="input-field pl-10 w-full" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV2', 'traineeSelectionContainerV2')">
+           <input type="text" id="traineeSearchV2" class="input-field py-2 pr-3 pl-10 w-full" placeholder="Search trainees..." onkeyup="filterList('traineeSearchV2', 'traineeSelectionContainerV2')">
          </div>
          <div class="checkbox-list-wrapper shadow-inner mt-2">
              <div id="traineeSelectionContainerV2" class="flex flex-col"></div>
@@ -346,9 +374,9 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
    </div>
   </div>
 
-  <!-- Settings View -->
+  <!-- Settings View (STACKED Layout) -->
   <div id="settings-page" class="app-view">
-   <div class="panels-container">
+   <div class="stacked-panels">
        
        <!-- Regular Settings -->
        <div class="section-panel">
@@ -358,7 +386,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
            </div>
            <div class="relative w-full">
              <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-             <input type="text" id="settingsRegularSearch" class="input-field pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('settingsRegularSearch', 'settings-regular-fields')">
+             <input type="text" id="settingsRegularSearch" class="input-field py-2 pr-3 pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('settingsRegularSearch', 'settings-regular-fields')">
            </div>
            <div class="checkbox-list-wrapper shadow-inner mt-2"><div id="settings-regular-fields" class="flex flex-col"></div></div>
        </div>
@@ -371,7 +399,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
            </div>
            <div class="relative w-full">
              <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg"></i>
-             <input type="text" id="settingsAdhocSearch" class="input-field pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('settingsAdhocSearch', 'settings-adhoc-fields')">
+             <input type="text" id="settingsAdhocSearch" class="input-field py-2 pr-3 pl-10 w-full" placeholder="Search fields..." onkeyup="filterList('settingsAdhocSearch', 'settings-adhoc-fields')">
            </div>
            <div class="checkbox-list-wrapper shadow-inner mt-2"><div id="settings-adhoc-fields" class="flex flex-col"></div></div>
        </div>
@@ -443,7 +471,6 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
    
    <form onsubmit="event.preventDefault(); handlePasswordSubmit();">
      <div class="mb-6">
-       <!-- Error positioned exactly above input -->
        <p id="password-modal-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-1">Invalid password</p>
        <div class="relative">
          <input id="password-input" type="password" class="input-field text-center tracking-widest text-xl p-3 pr-10 w-full" placeholder="••••••••" oninput="document.getElementById('password-modal-error').classList.add('hidden')">
@@ -572,7 +599,7 @@ function filterList(inputId, containerId) {
 * Main entry point utilizing DOMContentLoaded
 */
 document.addEventListener('DOMContentLoaded', () => {
- closePasswordModal(); // Force close any cached modals
+ closePasswordModal(); 
 
  if (ACTIVE_ENV === 'DEV') {
    document.getElementById('dev-banner').style.display = 'block';
@@ -662,7 +689,6 @@ function handleGeneralLogin() {
     .catch(err => {
       submitBtn.innerHTML = originalText;
       submitBtn.disabled = false;
-      // Show error directly above the password box to catch backend deployment issues
       errorEl.innerHTML = err.message.includes('Unknown action') 
         ? `Backend Error: Please deploy the latest Code.gs update.` 
         : `Error: ${err.message}`;
@@ -755,7 +781,6 @@ function populateSettingsForm() {
  const adhocContainer = document.getElementById('settings-adhoc-fields');
  const allAvailableFields =[...new Set(availableFields.map(f => f.label))].sort();
  
- // Safe Fallbacks
  const defaultMappings = appSettings.profileDefaultFieldMappings || {};
  const regularDefaults = defaultMappings['Regular Volunteer'] ||[];
  const adhocDefaults = defaultMappings['Adhoc Volunteer / Exposure Session'] || defaultMappings['Adhoc Volunteer'] ||[];
@@ -844,7 +869,6 @@ function handleUpdatePasswords() {
 }
 
 function loadApp(appVersion, profile = '') {
- // Use extremely safe property access in case backend settings are wiped
  const defaultMappings = appSettings.profileDefaultFieldMappings || {};
  const adhocLabels = defaultMappings["Adhoc Volunteer / Exposure Session"] || defaultMappings["Adhoc Volunteer"] ||[];
  
