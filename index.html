@@ -189,11 +189,14 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
       
       <!-- Generic Password Form -->
       <form onsubmit="event.preventDefault(); handleGeneralLogin();">
-        <div class="relative mb-4 text-left">
-          <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 py-3" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
-          <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i class="ph-bold ph-eye-slash text-xl"></i></button>
+        <div class="mb-4">
+          <!-- Notification positioned exactly above input -->
+          <p id="general-login-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-2">Invalid password</p>
+          <div class="relative text-left">
+            <input id="general-password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 py-3" placeholder="••••••••" oninput="document.getElementById('general-login-error').classList.add('hidden')" autofocus>
+            <button type="button" onclick="togglePasswordIcon(this, 'general-password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i class="ph-bold ph-eye-slash text-xl"></i></button>
+          </div>
         </div>
-        <p id="general-login-error" class="text-red-500 text-sm font-bold mb-4 hidden">Invalid password</p>
         <button type="submit" id="general-login-btn" class="btn-primary py-3 w-full">
           <i class="ph-bold ph-sign-in text-xl"></i> Login
         </button>
@@ -402,16 +405,18 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
      <button onclick="closePasswordModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"><i class="ph-bold ph-x text-xl"></i></button>
    </div>
    
-   <p id="password-modal-error" class="text-red-500 text-sm font-bold mb-2 hidden">Invalid password</p>
-   
    <form onsubmit="event.preventDefault(); handlePasswordSubmit();">
-     <div class="relative mb-6">
-       <input id="password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10" placeholder="••••••••" oninput="document.getElementById('password-modal-error').classList.add('hidden')">
-       <button type="button" onclick="togglePasswordIcon(this, 'password-input')" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-primary"><i class="ph-bold ph-eye-slash text-xl"></i></button>
+     <div class="mb-6">
+       <!-- Error positioned exactly above input -->
+       <p id="password-modal-error" class="text-red-500 text-sm font-bold mb-1 hidden text-left pl-2">Invalid password</p>
+       <div class="relative">
+         <input id="password-input" type="password" class="input-field text-center tracking-widest text-xl pr-10 py-3" placeholder="••••••••" oninput="document.getElementById('password-modal-error').classList.add('hidden')">
+         <button type="button" onclick="togglePasswordIcon(this, 'password-input')" class="absolute inset-y-0 right-0 flex items-center px-4 text-gray-400 hover:text-primary"><i id="modal-password-icon" class="ph-bold ph-eye-slash text-xl"></i></button>
+       </div>
      </div>
      <div class="flex gap-3">
-         <button type="button" class="btn-secondary py-2" onclick="closePasswordModal()">Cancel</button>
-         <button type="submit" class="btn-primary py-2">Unlock</button>
+         <button type="button" class="btn-secondary py-3" onclick="closePasswordModal()">Cancel</button>
+         <button type="submit" class="btn-primary py-3">Unlock</button>
      </div>
    </form>
   </div>
@@ -542,7 +547,10 @@ document.addEventListener('DOMContentLoaded', () => {
    .then(data => {
      appSettings = data.appSettings;
      allTrainees = data.allTrainees;
-     availableFields = data.availableFields;
+     
+     // PROCESSED EXACTLY ONCE HERE TO PREVENT DOUBLE MUTATION
+     availableFields = processAvailableFields(data.availableFields);
+     
      setLoadingState(false);
      switchView('landing-page');
    })
@@ -629,7 +637,7 @@ function promptForPassword(target) {
  error.classList.add('hidden');
  input.value = '';
  input.type = 'password';
- document.querySelector('#password-modal i').className = 'ph-bold ph-eye-slash text-xl';
+ document.getElementById('modal-password-icon').className = 'ph-bold ph-eye-slash text-xl'; 
  document.getElementById('password-modal').style.display = 'flex';
  
  setTimeout(() => { try { input.focus(); } catch(e) {} }, 100);
@@ -677,6 +685,7 @@ function handlePasswordSubmit() {
 }
 
 function processAvailableFields(fields) {
+ if (!fields || !Array.isArray(fields)) return[];
  let processedFields = fields
    .filter(field => !fieldsToExclude.includes(field.label))
    .map(field => fieldNameUpdates[field.label] ? { label: fieldNameUpdates[field.label], value: field.value } : field);
@@ -691,7 +700,6 @@ function processAvailableFields(fields) {
 }
 
 function loadSettingsPage() {
- availableFields = processAvailableFields(availableFields);
  populateSettingsForm();
  switchView('settings-page');
 }
@@ -700,8 +708,12 @@ function populateSettingsForm() {
  const regularContainer = document.getElementById('settings-regular-fields');
  const adhocContainer = document.getElementById('settings-adhoc-fields');
  const allAvailableFields =[...new Set(availableFields.map(f => f.label))].sort();
- const regularDefaults = appSettings.profileDefaultFieldMappings['Regular Volunteer'] ||[];
- const adhocDefaults = appSettings.profileDefaultFieldMappings['Adhoc Volunteer / Exposure Session'] ||[];
+ 
+ // Safe Fallbacks
+ const defaultMappings = appSettings.profileDefaultFieldMappings || {};
+ const regularDefaults = defaultMappings['Regular Volunteer'] ||[];
+ const adhocDefaults = defaultMappings['Adhoc Volunteer / Exposure Session'] || defaultMappings['Adhoc Volunteer'] || [];
+ 
  let regularHtml =[];
  let adhocHtml =[];
  
@@ -786,9 +798,13 @@ function handleUpdatePasswords() {
 }
 
 function loadApp(appVersion, profile = '') {
- availableFields = processAvailableFields(availableFields);
- const adhocLabels = appSettings.profileDefaultFieldMappings["Adhoc Volunteer / Exposure Session"];
- defaultFieldHeadersForAppV2Values = availableFields.filter(f => adhocLabels.includes(f.label)).map(f => f.value);
+ // Use extremely safe property access in case backend settings are wiped
+ const defaultMappings = appSettings.profileDefaultFieldMappings || {};
+ const adhocLabels = defaultMappings["Adhoc Volunteer / Exposure Session"] || defaultMappings["Adhoc Volunteer"] ||[];
+ 
+ defaultFieldHeadersForAppV2Values = availableFields
+    .filter(f => adhocLabels.includes(f.label))
+    .map(f => f.value);
  
  switchView('main-app-content');
  document.getElementById('app-v1-content').style.display = (appVersion === 'AppV1') ? 'flex' : 'none';
@@ -870,7 +886,8 @@ function handleDefaultFieldsToggle() {
 }
 
 function updateFieldsBasedOnDefaults() {
- const defaultLabels = appSettings.profileDefaultFieldMappings[selectedProfileForAppV1] ||[];
+ const defaultMappings = appSettings.profileDefaultFieldMappings || {};
+ const defaultLabels = defaultMappings[selectedProfileForAppV1] ||[];
  document.querySelectorAll('#fieldSelectionContainer input').forEach(cb => {
    const field = availableFields.find(f => f.value === cb.value);
    cb.checked = areDefaultsSelected && field && defaultLabels.includes(field.label);
