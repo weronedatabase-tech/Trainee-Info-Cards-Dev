@@ -70,6 +70,7 @@ const GAS_WEB_APP_URL = ENV_URLS[ACTIVE_ENV];
   .section-medical { border-left: 4px solid #ef4444; background: rgba(239, 68, 68, 0.05); }
   .section-abilities { border-left: 4px solid #a855f7; background: rgba(168, 85, 247, 0.05); }
   .section-engagement { border-left: 4px solid #eab308; background: rgba(234, 179, 8, 0.05); }
+  .section-employment { border-left: 4px solid #10b981; background: rgba(16, 185, 129, 0.05); }
 
   details > summary { list-style: none; cursor: pointer; outline: none; }
   details > summary::-webkit-details-marker { display: none; }
@@ -461,7 +462,7 @@ async function runAdminGeneration() {
   const stat = document.getElementById('admin-regen-status');
   const btn = document.getElementById('btn-admin-gen');
   
-  let list = sel === 'ALL' ? appData.allTrainees : [sel];
+  let list = sel === 'ALL' ? appData.allTrainees :[sel];
   if(list.length === 0) return;
   
   stat.classList.remove('hidden'); btn.disabled = true; btn.style.opacity = '0.5';
