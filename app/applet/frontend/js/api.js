@@ -21,11 +21,11 @@ async function callBackend(action, payload = {}) {
   let result;
   
   try {
-       result = JSON.parse(text);
-   } catch(e) {
-       throw new Error("Connection failed. Check permissions.");
-   }
+    result = JSON.parse(text);
+  } catch(e) {
+    throw new Error(text || "Connection failed. Please check permissions.");
+  }
    
-  if (!result.success) throw new Error(result.error);
+  if (!result.success) throw new Error(result.error || "Operation failed.");
   return result.data;
 }

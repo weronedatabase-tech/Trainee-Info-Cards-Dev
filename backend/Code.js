@@ -89,21 +89,33 @@ function doPost(e) {
   try {
     if (!e || !e.postData || !e.postData.contents) throw new Error("No data received.");
     const request = JSON.parse(e.postData.contents);
-    const action = request.action;
-    const payload = request.payload || {};
-    let result;
+    const action = request.action || request.method;
+    
+    let payload = request.payload;
+    if (!payload || typeof payload !== 'object') {
+      payload = request;
+    }
+    
+    const password = payload.password || request.password || (typeof request.payload === 'string' ? request.payload : undefined);
+    const traineeName = payload.traineeName || request.traineeName;
+    const profile = payload.profile || request.profile;
+    const newMappings = payload.newMappings || request.newMappings;
+    const passwords = payload.passwords || request.passwords;
 
+    let result;
     switch (action) {
       case 'getInitialData': result = getInitialData(); break;
-      case 'login': result = loginUser(payload.password); break;
-      case 'verifySettingsPassword': result = verifyPassword('Settings', payload.password); break;
-      case 'saveAppSettings': result = saveAppSettings(payload.newMappings); break;
-      case 'updatePasswords': result = updatePasswords(payload.passwords); break;
-      case 'getTraineeCardData': result = getTraineeCardData(payload.traineeName, payload.profile); break;
-      case 'adminGenerateCardText': result = adminGenerateCardText(payload.traineeName); break;
+      case 'login': 
+        if (!password) throw new Error("Please enter a password.");
+        result = loginUser(password); 
+        break;
+      case 'verifySettingsPassword': result = verifyPassword('Settings', password); break;
+      case 'saveAppSettings': result = saveAppSettings(newMappings); break;
+      case 'updatePasswords': result = updatePasswords(passwords); break;
+      case 'getTraineeCardData': result = getTraineeCardData(traineeName, profile); break;
+      case 'adminGenerateCardText': result = adminGenerateCardText(traineeName); break;
       default: throw new Error(`Unknown action requested: ${action}`);
     }
-
     return ContentService.createTextOutput(JSON.stringify({ success: true, data: result })).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     Logger.log(`API Error: ${error.message}`);

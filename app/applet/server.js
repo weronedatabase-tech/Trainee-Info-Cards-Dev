@@ -13,26 +13,53 @@ app.post('/api/gas', async (req, res) => {
       return res.status(400).json({ success: false, error: 'envUrl is required' });
     }
 
-    const response = await fetch(envUrl, {
+    // Include both nested payload and spread fields to support all versions of GAS backend code
+    const postData = { action, payload: payload || {}, ...(payload || {}) };
+
+    const gasResponse = await fetch(envUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action, payload })
+      body: JSON.stringify(postData),
+      redirect: 'manual'
     });
     
-    const text = await response.text();
+    let text;
+    if (gasResponse.status === 301 || gasResponse.status === 302 || gasResponse.status === 307) {
+      const redirectUrl = gasResponse.headers.get('location');
+      if (redirectUrl) {
+        const redirectedResponse = await fetch(redirectUrl, { method: 'GET' });
+        text = await redirectedResponse.text();
+      } else {
+        text = await gasResponse.text();
+      }
+    } else {
+      text = await gasResponse.text();
+    }
+
     let result;
     try {
       result = JSON.parse(text);
     } catch (e) {
-      // If the Apps Script returned plain text or HTML (e.g. an error page)
-      return res.json({ success: false, error: "Failed to parse GAS response: " + text.substring(0, 100) });
+      return res.json({ 
+        success: false, 
+        error: "Failed to parse GAS response: " + text.substring(0, 150) 
+      });
     }
     
+    if (result.success === false) {
+      return res.json({ success: false, error: result.error || 'Request failed' });
+    }
     if (result.status === 'error') {
-      return res.json({ success: false, error: result.message });
+      return res.json({ success: false, error: result.message || 'Request failed' });
+    }
+    if (result.success === true) {
+      return res.json({ success: true, data: result.data });
+    }
+    if (result.status === 'success') {
+      return res.json({ success: true, data: result.data || result });
     }
     
-    res.json(result);
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error('Proxy error:', error);
     res.status(500).json({ success: false, error: error.message });
