@@ -1,8 +1,8 @@
 // In GAS, ENV_CONFIG is globally available from config.js (which becomes config.gs when pushed via clasp)
 
 const CONSTANTS = {
-  SPREADSHEET_ID: ENV_CONFIG.SHEETS[ENV_CONFIG.ACTIVE_ENV],
-  PHOTO_FOLDER_ID: ENV_CONFIG.DRIVE_FOLDER_ID,
+  get SPREADSHEET_ID() { return ENV_CONFIG.SHEETS[ENV_CONFIG.ACTIVE_ENV]; },
+  get PHOTO_FOLDER_ID() { return ENV_CONFIG.DRIVE_FOLDER_ID; },
   SHEETS: {
     TRAINEE_INFO: 'TRAINEE INFO',
     SETTINGS: 'Settings'

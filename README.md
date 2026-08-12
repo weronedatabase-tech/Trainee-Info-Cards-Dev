@@ -5,7 +5,7 @@ This repository contains the source code for the Trainee Info Cards application.
 ## Structure
 
 - **frontend/**: Contains the modularized CSS and JavaScript for the web application UI.
-- **backend/**: Contains the Google Apps Script code (\`code.js\`) and the shared configuration (\`config.js\`).
+- **backend/**: Contains the Google Apps Script code (\`Code.js\`) and the shared configuration (\`config.js\`).
 - **assets/**: Contains static assets such as icons.
 - **index.html**: The main entry point for the static web app.
 - **.github/workflows/**: Contains CI/CD pipelines, including automatic deployment to Google Apps Script.
