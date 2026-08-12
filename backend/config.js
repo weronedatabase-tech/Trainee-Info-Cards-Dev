@@ -1,4 +1,4 @@
-const ENV_CONFIG = {
+var ENV_CONFIG = {
   ACTIVE_ENV: 'DEV', // Set to 'PROD', 'DEV', or 'EXP'
   
   URLS: {
