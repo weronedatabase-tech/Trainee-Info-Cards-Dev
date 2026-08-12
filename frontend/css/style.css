@@ -1,0 +1,171 @@
+:root { 
+  --bg-color: #f3f4f6; 
+  --text-color: #111827; 
+  --glass-bg: rgba(255, 255, 255, 0.85); 
+  --glass-border: rgba(0, 0, 0, 0.1); 
+  --glass-strong-bg: #ffffff; 
+  --input-bg: #ffffff; 
+  --input-border: #d1d5db; 
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --text-muted: #6b7280;
+}
+
+.dark { 
+  --bg-color: #0A0A0B; 
+  --text-color: #D1D1D1; 
+  --glass-bg: rgba(14, 14, 16, 0.85); 
+  --glass-border: #222224; 
+  --glass-strong-bg: #131316; 
+  --input-bg: #1A1A1D; 
+  --input-border: #2A2A2E; 
+  --card-bg: #161619;
+  --card-border: #222224;
+  --text-muted: #9ca3af;
+}
+
+body { 
+  font-family: 'Inter', sans-serif; 
+  background-color: var(--bg-color); 
+  color: var(--text-color); 
+  -webkit-tap-highlight-color: transparent; 
+  transition: background-color 0.3s, color 0.3s; 
+}
+
+.theme-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+
+.theme-text-muted {
+  color: var(--text-muted);
+}
+
+.glass { 
+  background: var(--glass-bg); 
+  backdrop-filter: blur(12px); 
+  -webkit-backdrop-filter: blur(12px); 
+  border: 1px solid var(--glass-border); 
+}
+
+.glass-strong { 
+  background: var(--glass-strong-bg); 
+  border: 1px solid var(--glass-border);
+}
+
+.fade-in { animation: fadeIn 0.3s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.input-field { 
+  background: var(--input-bg); 
+  color: var(--text-color); 
+  border: 1px solid var(--input-border); 
+  font-size: 0.95rem; 
+  border-radius: 0.375rem; 
+  outline: none; 
+  transition: all 0.2s; 
+  padding: 0.75rem; 
+  width: 100%; 
+}
+.input-field:focus { 
+  border-color: #6366f1; 
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); 
+}
+
+.btn-primary { 
+  background: #4f46e5; 
+  color: white; 
+  font-weight: 600; 
+  padding: 0.75rem 1.5rem; 
+  border-radius: 0.375rem; 
+  width: 100%; 
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3); 
+  transition: transform 0.1s, opacity 0.2s; 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 0.5rem; 
+  border: 1px solid #4338ca; 
+  cursor: pointer; 
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-secondary { 
+  background: var(--card-bg); 
+  color: var(--text-color); 
+  border: 1px solid var(--glass-border); 
+  font-weight: 600; 
+  padding: 0.75rem 1.5rem; 
+  border-radius: 0.375rem; 
+  width: 100%; 
+  transition: all 0.2s; 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 0.5rem; 
+  cursor: pointer; 
+}
+.btn-secondary:hover { 
+  border-color: #6366f1; 
+  color: #818cf8; 
+}
+.btn-secondary:active { transform: scale(0.98); }
+
+/* Section Styling */
+details > summary { list-style: none; cursor: pointer; outline: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary .chevron { transition: transform 0.3s; }
+details[open] > summary .chevron { transform: rotate(180deg); }
+details[open] > div { animation: slideDown 0.3s ease-out; }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+.checkbox-list-wrapper { 
+  max-height: 200px; 
+  overflow-y: auto; 
+  background-color: var(--input-bg); 
+  border-radius: 0.375rem; 
+  border: 1px solid var(--input-border); 
+}
+.checkbox-list-wrapper label { 
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  padding: 0.75rem; 
+  border-bottom: 1px solid var(--glass-border); 
+  cursor: pointer; 
+  font-size: 0.85rem; 
+  color: var(--text-color); 
+}
+.checkbox-list-wrapper label:last-child {
+  border-bottom: none;
+}
+.checkbox-list-wrapper input[type="checkbox"] { 
+  width: 1.1rem; 
+  height: 1.1rem; 
+  accent-color: #6366f1; 
+  cursor: pointer; 
+}
+
+.modal-overlay { 
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+  display: none; align-items: center; justify-content: center; 
+  z-index: 1000; 
+}
+
+/* Scrollbar styling for Elegant Dark */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: #2A2A2E;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3A3A3E;
+}
