@@ -147,11 +147,11 @@ function doPost(e) {
    switch (action) {
      case 'getInitialData': result = getInitialData(); break;
      case 'login': 
-       if (!password) throw new Error("Please enter a password.");
        result = loginUser(password); 
-       if (!result) throw new Error("Invalid password or user not found.");
        break;
-     case 'verifySettingsPassword': result = verifyPassword('Settings', password); break;
+     case 'verifySettingsPassword': 
+       result = verifyPassword('Settings', password); 
+       break;
      case 'saveAppSettings': result = saveAppSettings(newMappings); break;
      case 'updatePasswords': result = updatePasswords(passwords); break;
      case 'getTraineeCardData': result = getTraineeCardData(traineeName, profile); break;
@@ -316,48 +316,76 @@ function saveAppSettings(newMappings) {
  }
 }
 
-function loginUser(rawPassword) {
- try {
-   if (!rawPassword) return false;
-   const password = String(rawPassword).trim();
-   const props = PropertiesService.getScriptProperties();
-   
-   // Robust multi-key whitespace-trimmed property check
-   const checkPass = (keys) => {
-     for (let k of keys) {
-       let val = props.getProperty(k);
-       if (val && String(val).trim() === password) return true;
-     }
-     return false;
-   };
+function sanitizePass_(p) {
+ let s = String(p).trim();
+ if (s.startsWith('"') && s.endsWith('"')) s = s.slice(1, -1);
+ if (s.startsWith("'") && s.endsWith("'")) s = s.slice(1, -1);
+ return s;
+}
 
-   if (checkPass(['Regular-Volunteer', 'Regular Volunteer', 'REGULAR_VOLUNTEER'])) return 'Regular Volunteer';
-   if (checkPass(['Adhoc-Volunteer', 'Adhoc Volunteer', 'ADHOC_VOLUNTEER'])) return 'Adhoc Volunteer';
-   if (checkPass(['Settings', 'SETTINGS'])) return 'Settings';
+function loginUser(rawPassword) {
+ if (!rawPassword) throw new Error("Please enter a password.");
+ const password = sanitizePass_(rawPassword);
+ 
+ const stores = [
+   PropertiesService.getScriptProperties(),
+   PropertiesService.getDocumentProperties(),
+   PropertiesService.getUserProperties()
+ ];
+ 
+ let keysChecked = [];
+ let foundAny = false;
+ 
+ for (let store of stores) {
+   let props;
+   try { props = store ? store.getProperties() : {}; } catch(e) { continue; }
    
-   return false;
- } catch (e) {
-   return false;
+   for (let key in props) {
+     foundAny = true;
+     keysChecked.push(key);
+     
+     const storedPass = sanitizePass_(props[key]);
+     if (storedPass === password) {
+       let k = key.toLowerCase();
+       if (k.includes('setting') || k.includes('admin')) return 'Settings';
+       if (k.includes('adhoc') || k.includes('ad-hoc')) return 'Adhoc Volunteer';
+       // Default mapped assignment for standard or wildly named keys matching the value
+       return 'Regular Volunteer';
+     }
+   }
  }
+ 
+ if (!foundAny) {
+   throw new Error("No passwords have been configured in Google Apps Script Properties yet.");
+ }
+ 
+ throw new Error("Incorrect password. (Checked Property Keys: " + keysChecked.join(', ') + ")");
 }
 
 function verifyPassword(profile, rawPassword) {
- try {
-   if (!rawPassword) return false;
-   const password = String(rawPassword).trim();
-   const props = PropertiesService.getScriptProperties();
+ if (!rawPassword) return false;
+ const password = sanitizePass_(rawPassword);
+ 
+ const stores = [
+   PropertiesService.getScriptProperties(),
+   PropertiesService.getDocumentProperties(),
+   PropertiesService.getUserProperties()
+ ];
+ 
+ for (let store of stores) {
+   let props;
+   try { props = store ? store.getProperties() : {}; } catch(e) { continue; }
    
-   const checkPass = (keys) => {
-     for (let k of keys) {
-       let val = props.getProperty(k);
-       if (val && String(val).trim() === password) return true;
+   for (let key in props) {
+     if (sanitizePass_(props[key]) === password) {
+       let k = key.toLowerCase();
+       if (profile === 'Settings' && (k.includes('setting') || k.includes('admin'))) return true;
+       if (profile === 'Regular Volunteer' && !k.includes('setting') && !k.includes('admin') && !k.includes('adhoc')) return true;
+       if (profile === 'Adhoc Volunteer' && (k.includes('adhoc') || k.includes('ad-hoc'))) return true;
      }
-     return false;
-   };
-
-   if (profile === 'Settings' && checkPass(['Settings', 'SETTINGS'])) return true;
-   return false;
- } catch (e) { return false; }
+   }
+ }
+ return false;
 }
 
 function updatePasswords(passwords) {
@@ -368,7 +396,7 @@ function updatePasswords(passwords) {
    let updated = false;
    for (const p in passwords) {
        if (passwords[p] && map[p]) { 
-           props[map[p]] = String(passwords[p]).trim(); 
+           props[map[p]] = sanitizePass_(passwords[p]); 
            updated = true; 
        }
    }
