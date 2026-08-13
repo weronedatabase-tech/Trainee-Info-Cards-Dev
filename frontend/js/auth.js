@@ -18,20 +18,14 @@ async function handleGeneralLogin() {
  btn.disabled = true;
 
  try {
-   if (!appData) {
-       await dataPromise; // Ensure bg-load completed
-       if (!appData) {
-           // Retry fetching data if it failed during background initialization
-           appData = await callBackend('getInitialData');
-       }
-   }
-   
+   // Authenticate immediately. DO NOT block on dataPromise here.
    const profile = await callBackend('login', { password: pass });
    
    btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Login'; 
    btn.disabled = false;
    
    if (profile === 'Settings') return openAdminSettingsAuth(true);
+   
    if (profile) {
       currentProfile = profile;
       
@@ -46,9 +40,12 @@ async function handleGeneralLogin() {
       // Show logout button
       document.getElementById('btn-logout').classList.remove('hidden');
       
-      populateTraineeSelect('trainee-select');
+      // Transition UI to main app
       document.getElementById('landing-page').style.display = 'none';
       document.getElementById('main-app-content').style.display = 'flex';
+      
+      // Now ensure background data is loaded in the main UI without freezing the login button
+      await ensureDataLoaded();
    } else {
       err.innerText = "Incorrect Password"; 
       err.classList.remove('hidden');
@@ -56,9 +53,44 @@ async function handleGeneralLogin() {
  } catch(e) {
    btn.innerHTML = '<i class="ph-bold ph-sign-in"></i> Login'; 
    btn.disabled = false;
-   err.innerText = "Error: " + e.message; 
+   
+   let msg = e.message || String(e);
+   if (msg.startsWith("Error: ")) msg = msg.substring(7);
+   
+   err.innerText = "Error: " + msg; 
    err.classList.remove('hidden');
  }
+}
+
+async function ensureDataLoaded() {
+ const container = document.getElementById('card-container');
+ const select = document.getElementById('trainee-select');
+ 
+ // If appData isn't ready yet, show skeleton loading state in the main UI
+ if (!appData) {
+    container.innerHTML = `
+      <div class="text-center py-16 fade-in glass-strong rounded-2xl border" style="border-color: var(--glass-border);">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+        <p class="theme-text-muted text-sm animate-pulse font-mono tracking-widest uppercase">Syncing Database...</p>
+      </div>`;
+      
+    try {
+       await dataPromise; 
+       if (!appData) {
+           appData = await callBackend('getInitialData');
+       }
+    } catch (e) {
+       container.innerHTML = `
+         <div class="text-red-500 text-center py-10 font-bold glass-strong rounded-2xl border border-red-500/30">
+           Failed to load database. Please refresh the app.
+         </div>`;
+       return;
+    }
+    
+    container.innerHTML = '';
+ }
+ 
+ populateTraineeSelect('trainee-select');
 }
 
 function logout() {

@@ -6,10 +6,10 @@ let currentProfile = '';
 let dataPromise = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-   // 1. Initiate Data Load Early
+   // 1. Initiate Data Load Early (Silent Background Promise)
    dataPromise = callBackend('getInitialData')
        .then(d => { appData = d; return d; })
-       .catch(e => { console.error("Initial data load failed:", e); return null; });
+       .catch(e => { console.warn("Background load deferred until login:", e); return null; });
 
    // 2. Configure Dynamic Environment specific UI
    setupEnvironmentUI();
