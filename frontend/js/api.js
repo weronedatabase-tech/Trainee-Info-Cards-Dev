@@ -9,44 +9,12 @@ async function callBackend(action, payload = {}) {
    throw new Error(`Environment URL for ${ENV_CONFIG.ACTIVE_ENV} is missing.`);
  }
 
- const isStaticHost = window.location.hostname.includes('github.io') || 
-                      window.location.hostname.includes('web.app') ||
-                      window.location.hostname.includes('firebaseapp.com') ||
-                      window.location.protocol === 'file:';
-
- // If running locally with Node, route through the proxy to avoid strict browser CORS preflights
- if (!isStaticHost) {
-   try {
-     const response = await fetch('/api/gas', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({ action, payload, envUrl: url })
-     });
-
-     if (response.ok) {
-       const result = await response.json();
-       if (result.success === false) {
-         throw new Error(result.error || 'Operation failed');
-       }
-       return result.data;
-     }
-   } catch (e) {
-     // If the proxy itself returned a properly formatted error message, throw it up to the UI
-     if (e.message && !e.message.includes('Failed to fetch') && !e.message.includes('Unexpected token')) {
-       throw e;
-     }
-     // If the proxy is entirely unreachable, fall through to attempt direct GAS connection
-   }
- }
-
- // Fallback directly to Google Apps Script (will work on static hosts like GitHub Pages)
- return await callGasDirect(url, action, payload);
-}
-
-async function callGasDirect(url, action, payload = {}) {
+ // Construct a merged payload. Duplicate action/method to ensure all GAS versions detect it.
  const postData = { action: action, method: action, payload: payload || {}, ...(payload || {}) };
 
  try {
+   // Use direct text/plain POST to bypass CORS preflight.
+   // GAS will 302 redirect to a content server which returns proper CORS headers.
    const response = await fetch(url, {
      method: 'POST',
      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -60,7 +28,7 @@ async function callGasDirect(url, action, payload = {}) {
    try {
      result = JSON.parse(text);
    } catch (e) {
-     throw new Error("Apps Script returned an HTML page. Ensure the Web App access is set to 'Anyone'.");
+     throw new Error("Apps Script returned an HTML page. Ensure the Web App access is set to 'Anyone' and 'Execute as: Me'.");
    }
 
    if (result.success === false) {
@@ -79,9 +47,10 @@ async function callGasDirect(url, action, payload = {}) {
        msg = msg.substring(7);
    }
    
-   // Translate raw browser fetch failures into user-friendly text
+   // A "Failed to fetch" error on a text/plain GAS request almost always means 
+   // Google intercepted the request with a login redirect because permissions are wrong.
    if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
-     msg = "Network request blocked (CORS). If developing locally, ensure the Node proxy is running.";
+     msg = "Network request blocked. Ensure your Google Apps Script Web App is deployed with 'Execute as: Me' and 'Who has access: Anyone'.";
    }
    
    throw new Error(msg);
