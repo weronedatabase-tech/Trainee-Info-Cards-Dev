@@ -58,7 +58,8 @@ async function callBackend(action, payload = {}) {
 
 async function callGasDirect(url, action, payload = {}) {
  // Construct a merged payload compatible with all GAS doPost implementations
- const postData = { action, payload: payload || {}, ...(payload || {}) };
+ // Added method tag to ensure action is recognized by all version parsers
+ const postData = { action, method: action, payload: payload || {}, ...(payload || {}) };
 
  try {
    const response = await fetch(url, {
