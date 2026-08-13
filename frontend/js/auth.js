@@ -58,7 +58,8 @@ async function handleGeneralLogin() {
    let msg = e.message || String(e);
    if (msg.startsWith("Error: ")) msg = msg.substring(7);
    
-   err.innerText = "Error: " + msg; 
+   // Use innerHTML and replace newlines with <br> to support verbose backend diagnostic strings
+   err.innerHTML = "<b>Authentication Failed</b><br><br>" + msg.replace(/\n/g, '<br>'); 
    err.classList.remove('hidden');
  }
 }

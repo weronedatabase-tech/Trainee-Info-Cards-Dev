@@ -136,7 +136,6 @@ function doPost(e) {
      payload = request;
    }
    
-   // Extensively flat fallback for password fetching
    const password = payload.password || request.password || payload.pass || request.pass || (typeof request.payload === 'string' ? request.payload : undefined);
    const traineeName = payload.traineeName || request.traineeName;
    const profile = payload.profile || request.profile;
@@ -317,6 +316,7 @@ function saveAppSettings(newMappings) {
 }
 
 function sanitizePass_(p) {
+ if (p === null || p === undefined) return '';
  let s = String(p).trim();
  if (s.startsWith('"') && s.endsWith('"')) s = s.slice(1, -1);
  if (s.startsWith("'") && s.endsWith("'")) s = s.slice(1, -1);
@@ -327,62 +327,44 @@ function loginUser(rawPassword) {
  if (!rawPassword) throw new Error("Please enter a password.");
  const password = sanitizePass_(rawPassword);
  
- const stores = [
-   PropertiesService.getScriptProperties(),
-   PropertiesService.getDocumentProperties(),
-   PropertiesService.getUserProperties()
- ];
+ let props = {};
+ try {
+   props = PropertiesService.getScriptProperties().getProperties();
+ } catch(e) {}
  
- let keysChecked = [];
- let foundAny = false;
+ const keys = Object.keys(props);
  
- for (let store of stores) {
-   let props;
-   try { props = store ? store.getProperties() : {}; } catch(e) { continue; }
-   
-   for (let key in props) {
-     foundAny = true;
-     keysChecked.push(key);
-     
-     const storedPass = sanitizePass_(props[key]);
-     if (storedPass === password) {
-       let k = key.toLowerCase();
-       if (k.includes('setting') || k.includes('admin')) return 'Settings';
-       if (k.includes('adhoc') || k.includes('ad-hoc')) return 'Adhoc Volunteer';
-       // Default mapped assignment for standard or wildly named keys matching the value
-       return 'Regular Volunteer';
-     }
+ for (let key of keys) {
+   if (sanitizePass_(props[key]) === password) {
+     let k = key.toLowerCase();
+     if (k.includes('setting') || k.includes('admin')) return 'Settings';
+     if (k.includes('adhoc') || k.includes('ad-hoc')) return 'Adhoc Volunteer';
+     return 'Regular Volunteer';
    }
  }
  
- if (!foundAny) {
-   throw new Error("No passwords have been configured in Google Apps Script Properties yet.");
+ let scriptId = "Unknown";
+ try { scriptId = ScriptApp.getScriptId(); } catch(e) {}
+ 
+ if (keys.length === 0) {
+   throw new Error(`Authentication Failed: No properties found in this deployment.\n\nScript ID: ${scriptId}\n\nIf you recently added properties, your app's ENV_CONFIG URL is pointing to a different or outdated Google Apps Script deployment.`);
  }
  
- throw new Error("Incorrect password. (Checked Property Keys: " + keysChecked.join(', ') + ")");
+ throw new Error(`Authentication Failed: Password did not match.\n\nKeys seen by this deployment: [${keys.join(', ')}]\nScript ID: ${scriptId}\n\nIf the keys above do not match your screenshot, your web app URL is pointing to a different project.`);
 }
 
 function verifyPassword(profile, rawPassword) {
  if (!rawPassword) return false;
  const password = sanitizePass_(rawPassword);
+ let props = {};
+ try { props = PropertiesService.getScriptProperties().getProperties(); } catch(e){}
  
- const stores = [
-   PropertiesService.getScriptProperties(),
-   PropertiesService.getDocumentProperties(),
-   PropertiesService.getUserProperties()
- ];
- 
- for (let store of stores) {
-   let props;
-   try { props = store ? store.getProperties() : {}; } catch(e) { continue; }
-   
-   for (let key in props) {
-     if (sanitizePass_(props[key]) === password) {
-       let k = key.toLowerCase();
-       if (profile === 'Settings' && (k.includes('setting') || k.includes('admin'))) return true;
-       if (profile === 'Regular Volunteer' && !k.includes('setting') && !k.includes('admin') && !k.includes('adhoc')) return true;
-       if (profile === 'Adhoc Volunteer' && (k.includes('adhoc') || k.includes('ad-hoc'))) return true;
-     }
+ for (let key in props) {
+   if (sanitizePass_(props[key]) === password) {
+     let k = key.toLowerCase();
+     if (profile === 'Settings' && (k.includes('setting') || k.includes('admin'))) return true;
+     if (profile === 'Regular Volunteer' && !k.includes('setting') && !k.includes('admin') && !k.includes('adhoc')) return true;
+     if (profile === 'Adhoc Volunteer' && (k.includes('adhoc') || k.includes('ad-hoc'))) return true;
    }
  }
  return false;

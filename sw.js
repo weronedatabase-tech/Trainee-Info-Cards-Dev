@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trainee-info-cache-v8';
+const CACHE_NAME = 'trainee-info-cache-v9';
 const urlsToCache = [
  '/',
  '/index.html',
