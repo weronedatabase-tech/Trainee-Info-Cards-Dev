@@ -13,8 +13,18 @@ app.post('/api/gas', async (req, res) => {
      return res.status(400).json({ success: false, error: 'envUrl is required' });
    }
 
+   // Extract password explicitly to support legacy flattened parsers
+   const pass = payload ? (payload.password || payload.pass) : null;
+
    // Format payload with redundant keys to ensure full compatibility with GAS parser
-   const postData = { action: action, method: action, payload: payload || {}, ...(payload || {}) };
+   const postData = { 
+     action: action, 
+     method: action, 
+     password: pass,
+     pass: pass,
+     payload: payload || {}, 
+     ...(payload || {}) 
+   };
 
    // Utilize native Node 18 fetch. It natively handles Google's 302 redirects 
    // safely without dropping the original POST context.

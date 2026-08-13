@@ -2,7 +2,8 @@
 // AUTHENTICATION LOGIC
 // ==========================================
 async function handleGeneralLogin() {
- const pass = document.getElementById('general-password-input').value;
+ // Automatically trim invisible whitespaces from input
+ const pass = document.getElementById('general-password-input').value.trim();
  const err = document.getElementById('general-login-error');
  const btn = document.getElementById('general-login-btn');
  

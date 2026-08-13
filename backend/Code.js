@@ -25,7 +25,6 @@ function putChunkedCache(key, stringData) {
    cacheObj[`${key}_${i}`] = stringData.substring(i * CACHE_CHUNK_SIZE, (i + 1) * CACHE_CHUNK_SIZE);
  }
  
- // Store in CacheService for 6 hours (21600 seconds)
  cache.putAll(cacheObj, 21600);
 }
 
@@ -37,7 +36,6 @@ function getChunkedCache(key) {
  const numChunks = parseInt(numChunksStr, 10);
  let data = '';
  
- // Fetch all chunks at once to reduce API overhead
  const keys = [];
  for (let i = 0; i < numChunks; i++) {
    keys.push(`${key}_${i}`);
@@ -47,7 +45,7 @@ function getChunkedCache(key) {
  
  for (let i = 0; i < numChunks; i++) {
    const chunk = chunks[`${key}_${i}`];
-   if (!chunk) return null; // Incomplete or corrupted cache, must rebuild
+   if (!chunk) return null; 
    data += chunk;
  }
  
@@ -112,9 +110,6 @@ function menuGenerateAll() {
  SpreadsheetApp.getActiveSpreadsheet().toast(`Completed generation for ${count} out of ${trainees.length} trainees.`, "Success", 10);
 }
 
-/**
-* RUN THIS FUNCTION ONCE IN THE EDITOR TO FORCE PERMISSIONS
-*/
 function FORCE_AUTHORIZATION() {
  try {
    SpreadsheetApp.openById(CONSTANTS.SPREADSHEET_ID);
@@ -141,7 +136,8 @@ function doPost(e) {
      payload = request;
    }
    
-   const password = payload.password || request.password || (typeof request.payload === 'string' ? request.payload : undefined);
+   // Extensively flat fallback for password fetching
+   const password = payload.password || request.password || payload.pass || request.pass || (typeof request.payload === 'string' ? request.payload : undefined);
    const traineeName = payload.traineeName || request.traineeName;
    const profile = payload.profile || request.profile;
    const newMappings = payload.newMappings || request.newMappings;
@@ -153,6 +149,7 @@ function doPost(e) {
      case 'login': 
        if (!password) throw new Error("Please enter a password.");
        result = loginUser(password); 
+       if (!result) throw new Error("Invalid password or user not found.");
        break;
      case 'verifySettingsPassword': result = verifyPassword('Settings', password); break;
      case 'saveAppSettings': result = saveAppSettings(newMappings); break;
@@ -179,13 +176,12 @@ function getInitialData() {
  if (cached) {
    try { return JSON.parse(cached); } catch(e) {}
  }
- // Fallback if cache expired
  return rebuildAndCacheInitialData();
 }
 
 function rebuildAndCacheInitialData() {
  const lock = LockService.getScriptLock();
- lock.waitLock(15000); // Strict locking to prevent simultaneous rebuild overwrites
+ lock.waitLock(15000); 
  try {
    const traineeData = getTraineeData_();
    const data = { 
@@ -209,8 +205,6 @@ function cronPrecomputeAllData() {
  
  try {
    const initialData = rebuildAndCacheInitialData();
-   
-   // Preload all sheet dependencies to prevent opening sheet within loops
    const ss = SpreadsheetApp.openById(CONSTANTS.SPREADSHEET_ID);
    const sheet = ss.getSheetByName(CONSTANTS.SHEETS.TRAINEE_INFO);
    const allSheetData = sheet.getDataRange().getValues();
@@ -304,7 +298,7 @@ function getAvailableFields_(data) {
 
 function saveAppSettings(newMappings) {
  const lock = LockService.getScriptLock();
- lock.waitLock(15000); // 15s wait block to prevent multiple admins corrupting mapping
+ lock.waitLock(15000); 
  try {
    const ss = SpreadsheetApp.openById(CONSTANTS.SPREADSHEET_ID);
    const sheet = ss.getSheetByName(CONSTANTS.SHEETS.SETTINGS);
@@ -314,7 +308,6 @@ function saveAppSettings(newMappings) {
      if (newMappings[profileName]) sheet.getRange(i + 1, 2).setValue(newMappings[profileName].join(', '));
    }
    
-   // Atomic Write-Through: Rebuild initial mappings immediately so frontend gets fresh data
    rebuildAndCacheInitialData();
    
    return "Settings saved successfully!";
@@ -323,22 +316,47 @@ function saveAppSettings(newMappings) {
  }
 }
 
-function loginUser(password) {
+function loginUser(rawPassword) {
  try {
+   if (!rawPassword) return false;
+   const password = String(rawPassword).trim();
    const props = PropertiesService.getScriptProperties();
-   if (password === props.getProperty('Regular-Volunteer')) return 'Regular Volunteer';
-   if (password === props.getProperty('Adhoc-Volunteer')) return 'Adhoc Volunteer';
-   if (password === props.getProperty('Settings')) return 'Settings';
+   
+   // Robust multi-key whitespace-trimmed property check
+   const checkPass = (keys) => {
+     for (let k of keys) {
+       let val = props.getProperty(k);
+       if (val && String(val).trim() === password) return true;
+     }
+     return false;
+   };
+
+   if (checkPass(['Regular-Volunteer', 'Regular Volunteer', 'REGULAR_VOLUNTEER'])) return 'Regular Volunteer';
+   if (checkPass(['Adhoc-Volunteer', 'Adhoc Volunteer', 'ADHOC_VOLUNTEER'])) return 'Adhoc Volunteer';
+   if (checkPass(['Settings', 'SETTINGS'])) return 'Settings';
+   
    return false;
  } catch (e) {
    return false;
  }
 }
 
-function verifyPassword(profile, password) {
+function verifyPassword(profile, rawPassword) {
  try {
-   const expectedPassword = PropertiesService.getScriptProperties().getProperty({ 'Regular Volunteer': 'Regular-Volunteer', 'Adhoc Volunteer': 'Adhoc-Volunteer', 'Settings': 'Settings' }[profile]);
-   return expectedPassword !== null && expectedPassword === password;
+   if (!rawPassword) return false;
+   const password = String(rawPassword).trim();
+   const props = PropertiesService.getScriptProperties();
+   
+   const checkPass = (keys) => {
+     for (let k of keys) {
+       let val = props.getProperty(k);
+       if (val && String(val).trim() === password) return true;
+     }
+     return false;
+   };
+
+   if (profile === 'Settings' && checkPass(['Settings', 'SETTINGS'])) return true;
+   return false;
  } catch (e) { return false; }
 }
 
@@ -348,7 +366,12 @@ function updatePasswords(passwords) {
  try {
    const props = {}, map = { 'Regular Volunteer': 'Regular-Volunteer', 'Adhoc Volunteer': 'Adhoc-Volunteer', 'Settings': 'Settings' };
    let updated = false;
-   for (const p in passwords) if (passwords[p] && map[p]) { props[map[p]] = passwords[p]; updated = true; }
+   for (const p in passwords) {
+       if (passwords[p] && map[p]) { 
+           props[map[p]] = String(passwords[p]).trim(); 
+           updated = true; 
+       }
+   }
    if (!updated) throw new Error("No passwords provided.");
    PropertiesService.getScriptProperties().setProperties(props, false);
    return "Passwords updated successfully!";
@@ -369,15 +392,11 @@ function getTraineeCardData(traineeName, profile) {
    try { return JSON.parse(cached); } catch(e) {}
  }
 
- // If missed, dynamically build and cache immediately
  const cardData = buildTraineeCardData_(traineeName, profile);
  putChunkedCache(cacheKey, JSON.stringify(cardData));
  return cardData;
 }
 
-/**
-* Internal builder to prevent duplicate Sheet calls during CRON caching
-*/
 function buildTraineeCardData_(traineeName, profile, preloadedData = null, preloadedSettings = null) {
  let data = preloadedData;
  if (!data) {
@@ -394,15 +413,12 @@ function buildTraineeCardData_(traineeName, profile, preloadedData = null, prelo
  const row = data[rowIndex];
  let infoData = {};
 
- // First attempt to load pre-generated AI JSON content
  if (infoColIdx !== -1 && row[infoColIdx]) {
    try { infoData = JSON.parse(row[infoColIdx]); } catch(e) {}
  }
 
- // Fallback map remaining fields from row just in case
  headers.forEach((h, i) => { if (infoData[h] === undefined) infoData[h] = row[i] || ''; });
 
- // Construct Caregiver contacts mapping manually to consolidate
  let caregiverLines = [];[ {rel: 'Contact 1\nRelation (Name)', num: 'Contact 1\nNumber'},
    {rel: 'Contact 2\nRelation (Name)', num: 'Contact 2\nNumber'},
    {rel: 'Contact 3\nRelation / Name', num: 'Contact 3\nNumber'} ].forEach(c => {
@@ -411,14 +427,11 @@ function buildTraineeCardData_(traineeName, profile, preloadedData = null, prelo
  });
  if (caregiverLines.length > 0) infoData['caregiverContactInfo'] = caregiverLines.join('\n');
 
- // Load allowed fields from admin settings
  const settings = preloadedSettings || getAppSettings_();
  let allowedFields = settings.profileDefaultFieldMappings[profile] || settings.profileDefaultFieldMappings["Adhoc Volunteer / Exposure Session"] ||[];
 
- // Standard labels for mapping
  const labels = { "Age": "Age", "Gender": "Gender", "Address": "Address", "Spoken Language / Dialect": "Spoken Language / Dialect", "Current Medication （经期有没有服药物）": "Current Medication", "Past Medical Conditions (e.g. any Major Operation etc.) （前期病历表）": "Past Medical Conditions", "Dietary Restriction(s) (if any) （食物限制）": "Dietary Restrictions", "Functioning": "Functioning", "Verbal": "Verbal", "Mobility": "Mobility", "Travelling": "Travelling", "Engagement Tips and Fun Facts": "Engagement Tips and Fun Facts", "Current Employment / Weekday Activities": "Current Employment / Weekday Activities", "General Comments Issues and Goals": "General Comments Issues and Goals", "caregiverContactInfo": "Caregiver Contact Info" };
 
- // Category Configuration
  const CATEGORY_MAP =[
    { title: "Basic Information", icon: "ph-user-circle", color: "text-blue-500", bgClass: "section-basic", keys:["Age", "Gender", "Address", "Spoken Language / Dialect", "caregiverContactInfo"] },
    { title: "Medical & Dietary", icon: "ph-heartbeat", color: "text-red-500", bgClass: "section-medical", keys:["Current Medication （经期有没有服药物）", "Past Medical Conditions (e.g. any Major Operation etc.) （前期病历表）", "Dietary Restriction(s) (if any) （食物限制）"] },
@@ -433,14 +446,12 @@ function buildTraineeCardData_(traineeName, profile, preloadedData = null, prelo
    cat.keys.forEach(k => {
      let val = String(infoData[k] || '').trim();
      let label = labels[k] || k;
-     // Caregiver Contact is automatically allowed if "Contact X" was part of regular
      let isAllowed = k === 'caregiverContactInfo' ? allowedFields.some(a => a.includes("Contact")) : allowedFields.includes(label);
      if (isAllowed && val && val !== 'N/A') fields.push({ label: label, value: val });
    });
    if (fields.length > 0) categories.push({ ...cat, fields });
  });
 
- // Rapid Drive Photo Load (Wrapped defensively for CRON stability)
  let photoBase64 = null;
  let photoMime = null;
  try {
@@ -461,10 +472,6 @@ function buildTraineeCardData_(traineeName, profile, preloadedData = null, prelo
  };
 }
 
-/**
-* Triggers AI Generation for a given Trainee and stores it permanently.
-* Now strictly locked and cache-synchronous.
-*/
 function adminGenerateCardText(traineeName) {
  const lock = LockService.getScriptLock();
  lock.waitLock(15000);
@@ -504,12 +511,10 @@ function adminGenerateCardText(traineeName) {
 
    sheet.getRange(rowIndex + 1, targetColIndex + 1).setValue(JSON.stringify(infoJSON));
    
-   // Atomic Write-Through: Rebuild the mutated caches immediately
    rebuildAndCacheInitialData();
    const profiles = ['Regular Volunteer', 'Adhoc Volunteer'];
    for (let p of profiles) {
       const cacheKey = 'TRAINEE_DATA_' + ENV_CONFIG.ACTIVE_ENV + '_' + traineeName.replace(/\s+/g, '_') + '_' + p.replace(/\s+/g, '_');
-      // buildTraineeCardData_ will dynamically fetch the fresh sheet data we just wrote
       const cardData = buildTraineeCardData_(traineeName, p); 
       putChunkedCache(cacheKey, JSON.stringify(cardData));
    }
