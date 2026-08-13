@@ -5,7 +5,7 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// Proxy requests to Google Apps Script
+// Proxy requests to Google Apps Script to bypass local CORS restrictions
 app.post('/api/gas', async (req, res) => {
  try {
    const { action, payload, envUrl } = req.body;
@@ -13,57 +13,43 @@ app.post('/api/gas', async (req, res) => {
      return res.status(400).json({ success: false, error: 'envUrl is required' });
    }
 
-   // Include redundant metadata tags (action, method) to ensure backward/forward compatibility with all GAS versions
-   const postData = { action, method: action, payload: payload || {}, ...(payload || {}) };
+   // Format payload with redundant keys to ensure full compatibility with GAS parser
+   const postData = { action: action, method: action, payload: payload || {}, ...(payload || {}) };
 
-   const gasResponse = await fetch(envUrl, {
+   // Utilize native Node 18 fetch. It natively handles Google's 302 redirects 
+   // safely without dropping the original POST context.
+   const response = await fetch(envUrl, {
      method: 'POST',
      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
      body: JSON.stringify(postData),
-     redirect: 'manual'
+     redirect: 'follow'
    });
    
-   let text;
-   // Handle Google's automatic 302 redirects for Web Apps manually to retain the payload structure
-   if (gasResponse.status === 301 || gasResponse.status === 302 || gasResponse.status === 307) {
-     const redirectUrl = gasResponse.headers.get('location');
-     if (redirectUrl) {
-       const redirectedResponse = await fetch(redirectUrl, { method: 'GET' });
-       text = await redirectedResponse.text();
-     } else {
-       text = await gasResponse.text();
-     }
-   } else {
-     text = await gasResponse.text();
-   }
-
-   let result;
+   const text = await response.text();
+   
    try {
-     result = JSON.parse(text);
+     const result = JSON.parse(text);
+     
+     // Normalize GAS response structure
+     if (result.success === false) {
+       return res.json({ success: false, error: result.error || 'Request failed' });
+     }
+     if (result.status === 'error') {
+       return res.json({ success: false, error: result.message || 'Request failed' });
+     }
+     
+     res.json({ success: true, data: result.data !== undefined ? result.data : result });
    } catch (e) {
-     return res.json({ 
+     // If GAS returns an HTML authorization or 404 page instead of JSON
+     console.error("GAS returned non-JSON payload:", text.substring(0, 100));
+     res.json({ 
        success: false, 
-       error: "Failed to parse GAS response: " + text.substring(0, 150) 
+       error: "Google Apps Script returned an HTML page instead of data. Ensure you have run FORCE_AUTHORIZATION() in the script editor and deployed the Web App as 'Anyone'." 
      });
    }
-   
-   if (result.success === false) {
-     return res.json({ success: false, error: result.error || 'Request failed' });
-   }
-   if (result.status === 'error') {
-     return res.json({ success: false, error: result.message || 'Request failed' });
-   }
-   if (result.success === true) {
-     return res.json({ success: true, data: result.data });
-   }
-   if (result.status === 'success') {
-     return res.json({ success: true, data: result.data || result });
-   }
-   
-   res.json({ success: true, data: result });
  } catch (error) {
    console.error('Proxy error:', error);
-   res.status(500).json({ success: false, error: error.message });
+   res.status(500).json({ success: false, error: "Local proxy network error: " + error.message });
  }
 });
 

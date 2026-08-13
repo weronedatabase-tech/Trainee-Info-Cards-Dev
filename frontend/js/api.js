@@ -9,13 +9,41 @@ async function callBackend(action, payload = {}) {
    throw new Error(`Environment URL for ${ENV_CONFIG.ACTIVE_ENV} is missing.`);
  }
 
- // Exclusively use direct GAS fetching via text/plain to completely avoid Node Proxy hangs, 
- // payload stripping, and CORS preflight issues across all environments.
+ const isStaticHost = window.location.hostname.includes('github.io') || 
+                      window.location.hostname.includes('web.app') ||
+                      window.location.hostname.includes('firebaseapp.com') ||
+                      window.location.protocol === 'file:';
+
+ // If running locally with Node, route through the proxy to avoid strict browser CORS preflights
+ if (!isStaticHost) {
+   try {
+     const response = await fetch('/api/gas', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ action, payload, envUrl: url })
+     });
+
+     if (response.ok) {
+       const result = await response.json();
+       if (result.success === false) {
+         throw new Error(result.error || 'Operation failed');
+       }
+       return result.data;
+     }
+   } catch (e) {
+     // If the proxy itself returned a properly formatted error message, throw it up to the UI
+     if (e.message && !e.message.includes('Failed to fetch') && !e.message.includes('Unexpected token')) {
+       throw e;
+     }
+     // If the proxy is entirely unreachable, fall through to attempt direct GAS connection
+   }
+ }
+
+ // Fallback directly to Google Apps Script (will work on static hosts like GitHub Pages)
  return await callGasDirect(url, action, payload);
 }
 
 async function callGasDirect(url, action, payload = {}) {
- // Construct a merged payload. Duplicate action/method to ensure all GAS versions detect it.
  const postData = { action: action, method: action, payload: payload || {}, ...(payload || {}) };
 
  try {
@@ -32,10 +60,7 @@ async function callGasDirect(url, action, payload = {}) {
    try {
      result = JSON.parse(text);
    } catch (e) {
-     if (text.toLowerCase().includes('<html')) {
-       throw new Error("GAS returned an HTML page. Ensure your script deployment access is set to 'Anyone'.");
-     }
-     throw new Error("Invalid response from server: " + text.substring(0, 60));
+     throw new Error("Apps Script returned an HTML page. Ensure the Web App access is set to 'Anyone'.");
    }
 
    if (result.success === false) {
@@ -47,9 +72,18 @@ async function callGasDirect(url, action, payload = {}) {
 
    return result.data !== undefined ? result.data : result;
  } catch (err) {
-   // Strip redundant "Error: " prefixes before throwing upward
    let msg = err.message || "Connection failed.";
-   if (msg.startsWith("Error: ")) msg = msg.substring(7);
+   
+   // Clean up double errors
+   if (msg.startsWith("Error: ")) {
+       msg = msg.substring(7);
+   }
+   
+   // Translate raw browser fetch failures into user-friendly text
+   if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+     msg = "Network request blocked (CORS). If developing locally, ensure the Node proxy is running.";
+   }
+   
    throw new Error(msg);
  }
 }
